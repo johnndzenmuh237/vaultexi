@@ -53,8 +53,6 @@ img{display:block}
 .nav-burger{display:none;flex-direction:column;gap:4px;padding:4px}
 .nav-burger span{width:20px;height:2px;background:var(--paper);border-radius:2px;display:block}
 
-.demo-ribbon{background:var(--gold);color:#2b1c00;text-align:center;font-family:var(--font-mono);font-size:.72rem;font-weight:700;letter-spacing:.03em;padding:6px 12px;text-transform:uppercase}
-
 .wallet-strip{background:var(--ink-soft);border-bottom:1px solid var(--line)}
 .wallet-strip .container{display:flex;flex-wrap:wrap;gap:18px;align-items:center;padding:12px 24px}
 .w-stat{font-family:var(--font-mono);font-size:.78rem;display:flex;gap:6px;align-items:baseline}
@@ -67,8 +65,6 @@ img{display:block}
 .eyebrow{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mint);background:var(--mint-dim);padding:5px 12px;border-radius:20px;margin-bottom:16px}
 .hero h1{font-family:var(--font-display);font-size:2.3rem;font-weight:700;line-height:1.15;margin-bottom:14px}
 .hero p{color:var(--muted);font-size:1rem}
-.demo-banner{background:var(--gold-dim);border:1px solid var(--gold);border-radius:var(--radius-md);padding:12px 16px;font-size:.82rem;color:var(--paper);display:flex;gap:10px;align-items:flex-start;max-width:680px;margin:20px auto 0}
-.demo-banner .chip{flex-shrink:0;background:var(--gold);color:#2b1c00;font-family:var(--font-mono);font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase}
 
 .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:36px}
 .summary-card{background:var(--ink-soft);border:1px solid var(--line);border-radius:var(--radius-md);padding:16px 18px}
@@ -174,8 +170,6 @@ img{display:block}
 </head>
 <body>
 
-<div class="demo-ribbon">⚠ Demo staking — shares the same simulated balance as your Vaultex Dashboard. No real crypto is involved.</div>
-
 <header class="navbar">
   <div class="container">
     <a href="dashboard.html" class="nav-logo"><span class="mark">V</span><span class="brand-name">Vaultex</span></a>
@@ -213,13 +207,9 @@ img{display:block}
 
 <section class="hero">
   <div class="container text-center" style="max-width:680px;margin:0 auto">
-    <div class="eyebrow" style="justify-content:center">Staking <span class="demo-chip">Demo</span></div>
+    <div class="eyebrow" style="justify-content:center">Staking <span class="demo-chip">STK</span></div>
     <h1>Choose a plan. Stake. Watch it grow.</h1>
     <p>Pick a staking plan for each asset — flexible or fixed-term — and track your rewards accrue in real time, down to the second.</p>
-    <div class="demo-banner">
-      <span class="chip">Demo</span>
-      <span>Staking here uses your real Vaultex demo balance — the same one shown on your Dashboard. Converting balance into a coin here debits it immediately; unstaking credits your principal + reward straight back to that balance, ready to withdraw.</span>
-    </div>
   </div>
 </section>
 
