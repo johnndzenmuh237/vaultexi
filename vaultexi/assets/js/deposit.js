@@ -150,13 +150,4 @@
       });
     });
   });
-
-  // Unmissable demo notice, right under the form.
-  if (generateBtn) {
-    const notice = document.createElement('p');
-    notice.className = 'field-hint';
-    notice.style.cssText = 'margin-top:10px;color:var(--gold);';
-    notice.textContent = 'Demo mode: this address is simulated and cannot receive real crypto. Your simulated balance updates automatically after a short mock confirmation.';
-    generateBtn.insertAdjacentElement('afterend', notice);
-  }
 })();
