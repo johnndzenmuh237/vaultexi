@@ -310,23 +310,12 @@
 
   /* ----------------------------------------------------------
      GLOBAL CHROME — auto-binds elements present on ANY page:
-     [data-user-balance] text, and injects a "Demo Mode" badge
-     into the topbar so it's unmissable everywhere.
+     [data-user-balance] text.
   ---------------------------------------------------------- */
   function _renderGlobalChrome(state) {
     document.querySelectorAll('[data-user-balance]').forEach(el => {
       el.textContent = `$${state.balance.toFixed(2)}`;
     });
-
-    const topbar = document.querySelector('.dash-topbar > div:first-child');
-    if (topbar && !topbar.querySelector('.demo-mode-badge')) {
-      const badge = document.createElement('span');
-      badge.className = 'demo-mode-badge';
-      badge.textContent = DEMO_LABEL;
-      badge.style.cssText = 'display:inline-block;margin-left:10px;background:#2ee6a622;color:#2ee6a6;font-family:var(--font-mono);font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:5px;letter-spacing:.03em;text-transform:uppercase;vertical-align:middle;';
-      const h2 = topbar.querySelector('h2');
-      (h2 || topbar).appendChild(badge);
-    }
   }
 
   subscribe(_renderGlobalChrome);
