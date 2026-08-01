@@ -248,7 +248,7 @@
     const recent = botTrades.slice(0, 3);
 
     el.innerHTML = `
-      <div class="widget-head"><h3>VaultexBotTrade <span class="demo-chip">Demo</span></h3><span class="pill pill-up">Active</span></div>
+      <div class="widget-head"><h3>VaultexBotTrade <span class="demo-chip">VBT</span></h3><span class="pill pill-up">Active</span></div>
       <div style="margin:6px 0 14px;">
         <div style="font-family:var(--font-mono);font-size:1.3rem;color:${totalEarnings >= 0 ? 'var(--mint)' : 'var(--coral)'};font-weight:700;">${fmtSigned(totalEarnings)}</div>
         <div style="font-size:.68rem;color:var(--muted);">Simulated session earnings — already reflected in your balance above</div>
