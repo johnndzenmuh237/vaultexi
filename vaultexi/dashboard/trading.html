@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoTrading — VaultexBotTrade (Demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/responsive.css">
+
+<style>
+.bot-hero{position:relative;overflow:hidden;display:flex;align-items:center;gap:22px;flex-wrap:wrap;padding:26px;margin-bottom:22px}
+.bot-avatar{position:relative;width:74px;height:74px;flex-shrink:0}
+.bot-avatar svg{width:100%;height:100%;position:relative;z-index:2}
+.bot-avatar .ring{position:absolute;inset:-8px;border-radius:50%;border:1.5px solid var(--mint);opacity:.5;animation:bot-pulse 2.2s ease-out infinite}
+.bot-avatar .ring.r2{animation-delay:.7s}
+.bot-avatar .ring.r3{animation-delay:1.4s}
+@keyframes bot-pulse{0%{transform:scale(.8);opacity:.55}100%{transform:scale(1.7);opacity:0}}
+.bot-hero.idle .bot-avatar .ring{display:none}
+.bot-hero.idle .bot-avatar svg .eye{opacity:.35}
+
+.bot-hero-info{flex:1;min-width:220px}
+.bot-hero-info h1{font-family:var(--font-display);font-size:1.4rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bot-status-line{font-family:var(--font-mono);font-size:.78rem;color:var(--mint);margin-top:6px;min-height:18px;display:flex;align-items:center;gap:8px}
+.bot-status-line .dot{width:6px;height:6px;border-radius:50%;background:var(--mint);animation:bot-blink 1.4s ease-in-out infinite}
+@keyframes bot-blink{0%,100%{opacity:1}50%{opacity:.25}}
+.bot-hero.idle .bot-status-line{color:var(--muted)}
+.bot-hero.idle .bot-status-line .dot{background:var(--muted);animation:none}
+
+.bot-hero-stats{display:flex;gap:26px;flex-wrap:wrap}
+.bot-hero-stat strong{display:block;font-family:var(--font-mono);font-size:1.15rem}
+.bot-hero-stat span{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.bot-hero-stat.earn strong{color:var(--mint)}
+
+.demo-chip{display:inline-block;background:var(--gold);color:#2b1c00;font-family:var(--font-mono);font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase}
+
+.bal-strip{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 18px;margin-bottom:22px}
+.bal-strip .lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.bal-strip .val{font-family:var(--font-mono);font-size:1.15rem;font-weight:700}
+.bal-strip .val.zero{color:var(--muted)}
+.bal-strip-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.pkg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+@media (max-width:1100px){ .pkg-grid{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:620px){ .pkg-grid{grid-template-columns:1fr} }
+
+.pkg-card{display:flex;flex-direction:column;gap:12px;position:relative;border:1px solid var(--line);transition:border-color .15s,transform .15s}
+.pkg-card.active-pkg{border-color:var(--mint);box-shadow:0 0 0 1px var(--mint) inset}
+.pkg-card.locked{opacity:.62}
+.pkg-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--ink-raise, var(--ink));border:1px solid var(--line)}
+.pkg-icon svg{width:20px;height:20px}
+.pkg-name{font-family:var(--font-display);font-size:1.02rem;font-weight:700}
+.pkg-min{font-size:.68rem;color:var(--muted);font-family:var(--font-mono)}
+.pkg-rate{font-family:var(--font-mono);font-size:1.5rem;font-weight:700;color:var(--mint)}
+.pkg-rate small{font-size:.62rem;color:var(--muted);font-weight:400}
+.pkg-feats{list-style:none;display:flex;flex-direction:column;gap:6px;font-size:.72rem;color:var(--muted)}
+.pkg-feats li{display:flex;gap:6px;align-items:flex-start}
+.pkg-feats li::before{content:"✓";color:var(--mint);flex-shrink:0}
+.pkg-card .btn{margin-top:auto}
+.pkg-badge{position:absolute;top:14px;right:14px;font-family:var(--font-mono);font-size:.6rem;padding:2px 8px;border-radius:10px}
+.pkg-badge.active{background:var(--mint-dim, rgba(0,217,163,.12));color:var(--mint);border:1px solid var(--mint)}
+
+.feed-panel{display:flex;flex-direction:column;gap:0;max-height:340px;overflow-y:auto}
+.feed-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line);font-family:var(--font-mono);font-size:.74rem;animation:feed-in .25s ease-out}
+.feed-row:last-child{border-bottom:none}
+@keyframes feed-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.feed-icon{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.7rem}
+.feed-icon.scan{background:var(--ink-raise, var(--ink));color:var(--muted)}
+.feed-icon.long{background:var(--mint-dim, rgba(0,217,163,.12));color:var(--mint)}
+.feed-icon.short{background:var(--coral-dim, rgba(255,92,114,.12));color:var(--coral)}
+.feed-main{flex:1;min-width:0}
+.feed-pair{color:var(--paper)}
+.feed-note{color:var(--muted);font-size:.66rem}
+.feed-pnl{font-weight:700}
+.feed-pnl.up{color:var(--mint)}
+.feed-pnl.down{color:var(--coral)}
+.feed-time{color:var(--muted);font-size:.64rem;width:58px;text-align:right;flex-shrink:0}
+.feed-empty{padding:26px 0;text-align:center;color:var(--muted);font-family:var(--font-mono);font-size:.74rem}
+
+.countup-flash{animation:countup-flash .5s ease-out}
+@keyframes countup-flash{0%{color:var(--gold)}100%{color:var(--mint)}}
+
+.bot-note{font-size:.72rem;color:var(--muted);line-height:1.6;margin-top:6px}
+</style>
+</head>
+<body>
+
+<div class="dash-shell">
+
+  <aside class="dash-sidebar">
+    <a href="../index.html" class="nav-logo"><span class="mark">V</span><span>Vaultex</span></a>
+    <nav class="dash-nav">
+      <!-- populated by dashboard.js -->
+    </nav>
+  </aside>
+
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div>
+        <button class="sidebar-burger" data-sidebar-toggle aria-label="Toggle menu"><span></span><span></span><span></span></button>
+        <h2 class="mb-0" style="font-size:1.5rem;">AutoTrading</h2>
+        <p class="mb-0" style="font-size:.88rem;">VaultexBotTrade scans the market and trades on your behalf, using your shared demo balance.</p>
+      </div>
+      <div class="flex" style="gap:14px;">
+        <button class="theme-toggle" aria-label="Toggle theme">☾</button>
+        <button class="btn btn-ghost btn-sm" data-logout>Log out</button>
+      </div>
+    </div>
+
+    <!-- HERO -->
+    <div class="widget bot-hero idle" id="botHero">
+      <div class="bot-avatar">
+        <span class="ring"></span><span class="ring r2"></span><span class="ring r3"></span>
+        <svg viewBox="0 0 64 64" fill="none">
+          <rect x="14" y="22" width="36" height="28" rx="8" fill="#1B2236" stroke="var(--mint)" stroke-width="2"/>
+          <rect x="26" y="10" width="12" height="14" rx="4" fill="#1B2236" stroke="var(--mint)" stroke-width="2"/>
+          <circle cx="32" cy="12" r="2.5" fill="var(--mint)"/>
+          <circle class="eye" cx="24" cy="35" r="4" fill="var(--mint)"/>
+          <circle class="eye" cx="40" cy="35" r="4" fill="var(--mint)"/>
+          <rect x="22" y="45" width="20" height="3" rx="1.5" fill="var(--mint)" opacity=".6"/>
+          <rect x="6" y="30" width="8" height="14" rx="3" fill="#1B2236" stroke="var(--line)" stroke-width="2"/>
+          <rect x="50" y="30" width="8" height="14" rx="3" fill="#1B2236" stroke="var(--line)" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="bot-hero-info">
+        <h1>VaultexBotTrade <span class="demo-chip">Demo</span></h1>
+        <div class="bot-status-line" id="botStatusLine"><span class="dot"></span><span id="botStatusText">Bot idle — activate a package below to begin.</span></div>
+      </div>
+      <div class="bot-hero-stats">
+        <div class="bot-hero-stat earn"><strong id="statEarnings">$0.00</strong><span>Session earnings</span></div>
+        <div class="bot-hero-stat"><strong id="statRate">—</strong><span>Daily target</span></div>
+        <div class="bot-hero-stat"><strong id="statRuntime">—</strong><span>Runtime</span></div>
+      </div>
+    </div>
+
+    <!-- BALANCE STRIP -->
+    <div class="widget bal-strip">
+      <div>
+        <div class="lbl">Available balance (same balance as your Dashboard)</div>
+        <div class="val" data-user-balance id="availBalVal">$0.00</div>
+      </div>
+      <div class="bal-strip-actions">
+        <a href="deposits.html" class="btn btn-ghost btn-sm">Add funds</a>
+        <button class="btn btn-ghost btn-sm" id="stopBotBtn" style="display:none;">Deactivate bot</button>
+        <a href="trading.html" class="btn btn-ghost btn-sm">Open Trading Center</a>
+      </div>
+    </div>
+    <div class="widget" id="zeroBalWarn" style="display:none;border-color:var(--coral);margin-bottom:22px;">
+      <strong style="color:var(--coral);">No balance yet.</strong>
+      <span style="color:var(--muted);font-size:.85rem;"> VaultexBotTrade only runs against your real available balance — add funds from the Deposit page to activate a package.</span>
+    </div>
+
+    <!-- PACKAGES -->
+    <h3 style="font-family:var(--font-display);font-size:1.05rem;margin:0 0 12px;">AutoTrading packages</h3>
+    <div class="pkg-grid" id="pkgGrid"></div>
+
+    <!-- ACTIVITY FEED -->
+    <div class="widget">
+      <div class="widget-head"><h3>Live bot activity</h3><span class="pill pill-neutral" id="feedStatusPill">Idle</span></div>
+      <div class="feed-panel" id="feedPanel">
+        <div class="feed-empty">▣&nbsp;&nbsp;Activate a package to see scanning, signals, and trades appear here live.</div>
+      </div>
+      <p class="bot-note">VaultexBotTrade is a local, browser-only simulation for demo purposes. It reads and updates your shared Vaultex demo balance — the same one shown on your Dashboard and available on Withdrawals — by simulating market scanning and trade execution. No real exchange, broker, or payment provider is connected, and no real money is at risk or under management.</p>
+    </div>
+
+  </main>
+</div>
+
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/charts.js"></script>
+<!-- Firebase / auth-guard / backend removed — fully simulated demo. -->
+<script src="../assets/js/demo-store.js"></script>
+<script src="../assets/js/dashboard.js"></script>
+<script src="../assets/js/notifications.js"></script>
+
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const fmtMoney = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtSigned = n => (n >= 0 ? '+' : '−') + fmtMoney(Math.abs(n)).slice(1);
+
+  /* ============== SESSION CONFIG + FEED (local, not money) ==============
+     Which package is active, its target rate, and the scrolling
+     activity feed are session/display state, kept in this browser
+     only. The actual money — every credit/debit this bot makes — goes
+     straight through window.DemoStore, the same balance shown on the
+     Dashboard and everywhere else. */
+  const LS_BOT_STATE = 'vaultex_bot_state';
+  const LS_BOT_LOG   = 'vaultex_bot_log';
+
+  function getBalance() { return DemoStore.getState().balance; }
+  function getBotState() { try { return JSON.parse(localStorage.getItem(LS_BOT_STATE) || 'null'); } catch(e){ return null; } }
+  function setBotState(s) { localStorage.setItem(LS_BOT_STATE, JSON.stringify(s)); }
+  function getBotLog() { try { return JSON.parse(localStorage.getItem(LS_BOT_LOG) || '[]'); } catch(e){ return []; } }
+  function setBotLog(arr) { localStorage.setItem(LS_BOT_LOG, JSON.stringify(arr.slice(0, 40))); }
+
+  /* ============== PACKAGES ============== */
+  const ICONS = {
+    starter: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>',
+    growth:  '<svg viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2"><path d="M3 21V9M10 21V3M17 21v-7"/></svg>',
+    pro:     '<svg viewBox="0 0 24 24" fill="none" stroke="var(--mint)" stroke-width="2"><path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18M9 3l3 6 3-6"/></svg>',
+    elite:   '<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M2 8l5 4 5-9 5 9 5-4-2 11H4z"/></svg>'
+  };
+
+  const PACKAGES = [
+    { id:'starter', name:'Starter', icon:ICONS.starter, min:50,   rateMin:1.1, rateMax:1.9,
+      feats:['Trend + momentum filters','Conservative position sizing','BTC, ETH, SOL pairs'] },
+    { id:'growth',  name:'Growth',  icon:ICONS.growth,  min:250,  rateMin:1.9, rateMax:2.9,
+      feats:['Multi-pair scanning','Adaptive stop-loss logic','Priority over Starter signals'] },
+    { id:'pro',     name:'Pro',     icon:ICONS.pro,     min:1000, rateMin:2.9, rateMax:4.2,
+      feats:['Volatility-adjusted sizing','Priority signal queue','Faster trade cadence'] },
+    { id:'elite',   name:'Elite',   icon:ICONS.elite,   min:5000, rateMin:4.2, rateMax:5.8,
+      feats:['Full market pair coverage','Fastest signal execution','Highest daily target band'] },
+  ];
+
+  const PAIRS = ['BTC/USDT','ETH/USDT','SOL/USDT','BNB/USDT','XRP/USDT','ADA/USDT'];
+  const SCAN_PHRASES = [
+    p => `Scanning ${p} order flow…`,
+    p => `Analyzing momentum on ${p}…`,
+    p => `Checking volatility bands for ${p}…`,
+    p => `Cross-referencing signal confluence on ${p}…`,
+    p => `Evaluating liquidity depth on ${p}…`,
+    () => `Waiting for optimal entry conditions…`,
+  ];
+
+  /* ============== RECONCILE ELAPSED EARNINGS ON LOAD ============== */
+  function reconcile() {
+    const st = getBotState();
+    if (!st || !st.active) return;
+    const now = Date.now();
+    const elapsed = Math.max(0, now - (st.lastTickAt || now));
+    if (elapsed < 4000) return;
+    const cappedMs = Math.min(elapsed, 1000 * 60 * 60 * 24 * 3);
+    const bal = getBalance();
+    if (bal > 0) {
+      const earn = bal * (st.dailyRate / 100) * (cappedMs / 86400000) * 0.9;
+      if (earn > 0) {
+        DemoStore.credit(earn, { category: 'Bot', label: 'AutoTrading earnings while away', notify: false });
+        st.totalEarnings = (st.totalEarnings || 0) + earn;
+        const log = getBotLog();
+        log.unshift({ ts: now, pair: 'Portfolio', side: 'While away', pnl: earn, kind: 'trade' });
+        setBotLog(log);
+      }
+    }
+    st.lastTickAt = now;
+    setBotState(st);
+  }
+  reconcile();
+
+  /* ============== RENDER: BALANCE STRIP ============== */
+  function renderBalance() {
+    const bal = getBalance();
+    const el = $('availBalVal');
+    el.textContent = fmtMoney(bal);
+    el.classList.toggle('zero', bal <= 0);
+    $('zeroBalWarn').style.display = bal <= 0 ? '' : 'none';
+    return bal;
+  }
+
+  /* ============== RENDER: PACKAGES ============== */
+  function renderPackages() {
+    const bal = getBalance();
+    const st = getBotState();
+    const grid = $('pkgGrid');
+    grid.innerHTML = PACKAGES.map(pkg => {
+      const isActive = st && st.active && st.packageId === pkg.id;
+      const affordable = bal >= pkg.min;
+      return `
+        <div class="widget pkg-card ${isActive ? 'active-pkg' : ''} ${!affordable && !isActive ? 'locked' : ''}" data-pkg="${pkg.id}">
+          ${isActive ? '<span class="pkg-badge active">ACTIVE</span>' : ''}
+          <div class="pkg-icon">${pkg.icon}</div>
+          <div>
+            <div class="pkg-name">${pkg.name}</div>
+            <div class="pkg-min">Min. balance ${fmtMoney(pkg.min)}</div>
+          </div>
+          <div class="pkg-rate">${pkg.rateMin.toFixed(1)}–${pkg.rateMax.toFixed(1)}%<small> / day target</small></div>
+          <ul class="pkg-feats">${pkg.feats.map(f => `<li>${f}</li>`).join('')}</ul>
+          <button class="btn ${isActive ? 'btn-ghost' : 'btn-primary'} btn-block pkg-btn" data-pkg-btn="${pkg.id}" ${!affordable && !isActive ? 'disabled' : ''}>
+            ${isActive ? 'Active' : (affordable ? 'Activate' : `Requires ${fmtMoney(pkg.min)}`)}
+          </button>
+        </div>`;
+    }).join('');
+
+    grid.querySelectorAll('[data-pkg-btn]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pkgId = btn.dataset.pkgBtn;
+        const current = getBotState();
+        if (current && current.active && current.packageId === pkgId) return;
+        activatePackage(pkgId);
+      });
+    });
+  }
+
+  function activatePackage(pkgId) {
+    const pkg = PACKAGES.find(p => p.id === pkgId);
+    const bal = getBalance();
+    if (!pkg || bal < pkg.min) { renderPackages(); return; }
+    const rate = pkg.rateMin + Math.random() * (pkg.rateMax - pkg.rateMin);
+    const now = Date.now();
+    setBotState({
+      active: true,
+      packageId: pkg.id,
+      packageName: pkg.name,
+      dailyRate: rate,
+      principal: bal,
+      startedAt: now,
+      lastTickAt: now,
+      totalEarnings: 0
+    });
+    setBotLog([{ ts: now, pair: 'System', side: `${pkg.name} activated`, pnl: 0, kind: 'system' }, ...getBotLog()]);
+    renderAll();
+  }
+
+  function deactivateBot() {
+    const st = getBotState();
+    if (st) { st.active = false; setBotState(st); }
+    renderAll();
+  }
+  $('stopBotBtn').addEventListener('click', deactivateBot);
+
+  /* ============== HERO + STATUS LINE ============== */
+  let scanTimer = null;
+  function renderHero() {
+    const st = getBotState();
+    const hero = $('botHero');
+    const active = !!(st && st.active);
+    hero.classList.toggle('idle', !active);
+    $('stopBotBtn').style.display = active ? '' : 'none';
+    $('feedStatusPill').textContent = active ? 'Live' : 'Idle';
+    $('feedStatusPill').className = 'pill ' + (active ? 'pill-up' : 'pill-neutral');
+
+    if (active) {
+      $('statEarnings').textContent = fmtSigned(st.totalEarnings || 0);
+      $('statRate').textContent = st.dailyRate.toFixed(2) + '%';
+      const runningMs = Date.now() - st.startedAt;
+      const h = Math.floor(runningMs / 3600000), m = Math.floor((runningMs % 3600000) / 60000), s = Math.floor((runningMs % 60000) / 1000);
+      $('statRuntime').textContent = `${h}h ${m}m ${s}s`;
+    } else {
+      $('statEarnings').textContent = '$0.00';
+      $('statRate').textContent = '—';
+      $('statRuntime').textContent = '—';
+      $('botStatusText').textContent = 'Bot idle — activate a package below to begin.';
+    }
+  }
+
+  function cycleScanStatus() {
+    clearInterval(scanTimer);
+    scanTimer = setInterval(() => {
+      const st = getBotState();
+      if (!st || !st.active) return;
+      const pair = PAIRS[Math.floor(Math.random() * PAIRS.length)];
+      const phrase = SCAN_PHRASES[Math.floor(Math.random() * SCAN_PHRASES.length)](pair);
+      $('botStatusText').textContent = phrase;
+    }, 1800);
+  }
+  cycleScanStatus();
+
+  /* ============== ACTIVITY FEED ============== */
+  function renderFeed() {
+    const log = getBotLog();
+    const panel = $('feedPanel');
+    if (!log.length) {
+      panel.innerHTML = '<div class="feed-empty">▣&nbsp;&nbsp;Activate a package to see scanning, signals, and trades appear here live.</div>';
+      return;
+    }
+    panel.innerHTML = log.slice(0, 30).map(l => {
+      const isSystem = l.kind === 'system';
+      const up = l.pnl >= 0;
+      const iconCls = isSystem ? 'scan' : (up ? 'long' : 'short');
+      const iconGlyph = isSystem ? '⚙' : (up ? '↑' : '↓');
+      return `<div class="feed-row">
+        <div class="feed-icon ${iconCls}">${iconGlyph}</div>
+        <div class="feed-main">
+          <div class="feed-pair">${l.pair}${l.side ? ' · ' + l.side : ''}</div>
+          ${!isSystem ? `<div class="feed-note">Position closed</div>` : ''}
+        </div>
+        ${!isSystem ? `<div class="feed-pnl ${up ? 'up' : 'down'}">${fmtSigned(l.pnl)}</div>` : ''}
+        <div class="feed-time">${new Date(l.ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ============== LIVE TRADE TICK ============== */
+  let tickTimer = null;
+  function scheduleTick() {
+    clearTimeout(tickTimer);
+    const st = getBotState();
+    if (!st || !st.active) return;
+    const delay = 4500 + Math.random() * 3500;
+    tickTimer = setTimeout(() => {
+      runTick();
+      scheduleTick();
+    }, delay);
+  }
+
+  function runTick() {
+    const st = getBotState();
+    if (!st || !st.active) return;
+    const bal = getBalance();
+    if (bal <= 0) { deactivateBot(); return; }
+
+    const pair = PAIRS[Math.floor(Math.random() * PAIRS.length)];
+    const side = Math.random() > 0.5 ? 'LONG' : 'SHORT';
+    const perTickTarget = bal * (st.dailyRate / 100) * (7 / 86400);
+    const isWin = Math.random() < 0.87;
+    const pnl = isWin
+      ? perTickTarget * (0.6 + Math.random() * 1.1)
+      : -perTickTarget * (0.15 + Math.random() * 0.35);
+
+    const now = Date.now();
+    // Credit/debit straight into the SAME balance the Dashboard,
+    // Trading Center, Staking, and NFT pages all share.
+    DemoStore.credit(pnl, { category: 'Bot', label: `${pair} ${side}`, extra: { pair, side }, notify: false });
+    st.totalEarnings = (st.totalEarnings || 0) + pnl;
+    st.lastTickAt = now;
+    setBotState(st);
+
+    const log = getBotLog();
+    log.unshift({ ts: now, pair, side, pnl, kind: 'trade' });
+    setBotLog(log);
+
+    renderAll(true);
+    const earnEl = $('statEarnings');
+    earnEl.classList.remove('countup-flash'); void earnEl.offsetWidth; earnEl.classList.add('countup-flash');
+  }
+
+  /* ============== MAIN RENDER LOOP ============== */
+  function renderAll(skipPackages) {
+    renderBalance();
+    if (!skipPackages) renderPackages();
+    renderHero();
+    renderFeed();
+    scheduleTick();
+  }
+
+  DemoStore.subscribe(() => renderAll());
+  renderAll();
+  setInterval(renderHero, 1000);
+
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { reconcile(); renderAll(); } });
+})();
+</script>
+</body>
+</html>

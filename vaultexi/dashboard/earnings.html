@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Earnings — Vaultex (Demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/responsive.css">
+<style>
+.info-chip{display:inline-block;background:var(--gold);color:#2b1c00;font-family:var(--font-mono);font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase;margin-left:6px;vertical-align:middle;}
+.earn-stat .val{font-family:var(--font-mono);font-weight:700;font-size:1.5rem;}
+.earn-stat .lbl{font-size:.74rem;color:var(--muted);margin-top:4px;}
+.earn-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:24px;}
+.earn-source-tag{font-size:.63rem;padding:2px 6px;border-radius:4px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;}
+.earn-source-tag.demo{background:rgba(60,220,150,.12);color:var(--mint);}
+.earn-source-tag.bot{background:rgba(0,229,255,.12);color:#00E5FF;}
+@media (max-width:1024px){ .earn-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
+@media (max-width:560px){ .earn-grid{grid-template-columns:1fr;} }
+.earn-section-label{font-family:var(--font-mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;gap:8px;}
+.earn-notice{font-size:.76rem;color:var(--muted);background:var(--ink-soft, var(--ink-raise));border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:22px;}
+.btn-withdraw{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#00E5FF 0%,#7C5CFF 100%);color:#08111a;font-weight:700;border:none;border-radius:7px;padding:6px 14px;font-size:.72rem;letter-spacing:.01em;text-decoration:none;box-shadow:0 0 0 1px rgba(124,92,255,.25),0 4px 14px rgba(0,229,255,.18);transition:transform .15s ease,box-shadow .15s ease,filter .15s ease;}
+.btn-withdraw:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 0 0 1px rgba(124,92,255,.35),0 6px 20px rgba(0,229,255,.28);}
+.btn-withdraw:active{transform:translateY(0);filter:brightness(.96);}
+</style>
+</head>
+<body>
+
+<div class="dash-shell">
+
+  <aside class="dash-sidebar">
+    <a href="../index.html" class="nav-logo"><span class="mark">V</span><span>Vaultex</span></a>
+    <nav class="dash-nav">
+      <!-- populated by dashboard.js -->
+    </nav>
+  </aside>
+
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div>
+        <button class="sidebar-burger" data-sidebar-toggle aria-label="Toggle menu"><span></span><span></span><span></span></button>
+        <h2 class="mb-0" style="font-size:1.5rem;">Earnings</h2>
+        <p class="mb-0" style="font-size:.88rem;">Trading, AutoTrading, Staking, and NFT activity — all part of the one balance you can withdraw.</p>
+      </div>
+      <div class="flex" style="gap:14px;">
+        <button class="theme-toggle" aria-label="Toggle theme">☾</button>
+        <button class="theme-toggle" aria-label="Notifications" data-dropdown-trigger="notif-panel" style="position:relative;">⚑</button>
+        <button class="btn btn-ghost btn-sm" data-logout>Log out</button>
+      </div>
+    </div>
+
+    <!-- Account balance -->
+    <div class="widget balance-card" style="margin-bottom:24px;">
+      <div class="widget-head">
+        <h3>Total balance</h3>
+        <a href="withdrawals.html" class="btn-withdraw">Withdraw</a>
+      </div>
+      <div class="balance-amount">$0<span class="cents">.00</span></div>
+      <span class="pill pill-neutral" data-balance-pill>— $0.00 this week</span>
+    </div>
+
+    <div class="earn-notice">Every figure below comes from the same simulated balance shown on your Dashboard — Trading, AutoTrading, Staking, and NFT activity all post directly to it, and everything here is available on <a href="withdrawals.html" style="color:var(--paper);text-decoration:underline;">Withdrawals</a>.</div>
+
+    <!-- Trading -->
+    <div class="earn-section-label">Markets trading</div>
+    <div class="earn-grid">
+      <div class="widget earn-stat" data-earn-stat="all-time">
+        <div class="val" data-val>$0.00</div>
+        <div class="lbl">All-time P&amp;L</div>
+      </div>
+      <div class="widget earn-stat" data-earn-stat="week">
+        <div class="val" data-val>$0.00</div>
+        <div class="lbl">This week's P&amp;L</div>
+      </div>
+      <div class="widget" style="grid-column: span 2;">
+        <div class="widget-head"><h3>P&amp;L over time</h3></div>
+        <canvas data-chart="trading-pnl" width="600" height="100"></canvas>
+        <p data-trading-empty style="color:var(--muted);font-size:.8rem;margin-top:10px;display:none;">No closed trades yet.</p>
+      </div>
+    </div>
+
+    <!-- Bot -->
+    <div class="earn-section-label">VaultexBotTrade</div>
+    <div class="earn-grid">
+      <div class="widget earn-stat" data-earn-stat="bot-session">
+        <div class="val" data-val>$0.00</div>
+        <div class="lbl">Session earnings</div>
+      </div>
+      <div class="widget earn-stat" data-earn-stat="bot-rate">
+        <div class="val" data-val>—</div>
+        <div class="lbl">Daily target rate</div>
+      </div>
+      <div class="widget earn-stat" data-earn-stat="bot-status" style="grid-column: span 2;">
+        <div class="val" data-val>Idle</div>
+        <div class="lbl">Status</div>
+      </div>
+    </div>
+
+    <!-- Staking -->
+    <div class="earn-section-label">Staking</div>
+    <div class="earn-grid">
+      <div class="widget earn-stat" data-earn-stat="staking-active">
+        <div class="val" data-val>0</div>
+        <div class="lbl">Active stakes</div>
+      </div>
+      <div class="widget earn-stat" data-earn-stat="staking-paid">
+        <div class="val" data-val>$0.00</div>
+        <div class="lbl">Reward credited (completed)</div>
+      </div>
+      <div class="widget earn-stat" data-earn-stat="staking-count" style="grid-column: span 2;">
+        <div class="val" data-val>0</div>
+        <div class="lbl">Active stakes</div>
+      </div>
+    </div>
+
+    <!-- NFT -->
+    <div class="earn-section-label">NFT collection</div>
+    <div class="earn-grid">
+      <div class="widget earn-stat" data-earn-stat="nft-owned">
+        <div class="val" data-val>0</div>
+        <div class="lbl">NFTs owned</div>
+      </div>
+      <div class="widget earn-stat" data-earn-stat="nft-spend">
+        <div class="val" data-val>$0.00</div>
+        <div class="lbl">Total minted value</div>
+      </div>
+      <div class="widget" style="grid-column: span 2;">
+        <div class="lbl" style="font-size:.76rem;color:var(--muted);padding:6px 2px;">NFTs currently have no resale mechanic in this build, so minting only spends from your balance — there's no realized profit to show here.</div>
+      </div>
+    </div>
+
+    <!-- Combined activity -->
+    <div class="widget">
+      <div class="widget-head">
+        <h3>Combined activity</h3>
+        <span class="pill pill-neutral" style="font-size:.68rem;">One ledger — every entry already reflected in your balance above</span>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Date</th><th>Source</th><th>Detail</th><th>Amount</th></tr></thead>
+        <tbody data-earn-table><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">No activity yet.</td></tr></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<div id="notif-panel" class="widget" style="position:fixed;top:70px;right:24px;width:340px;z-index:300;display:none;box-shadow:var(--shadow-card);">
+  <div class="widget-head"><h3>Notifications</h3></div>
+  <div data-notif-list></div>
+</div>
+<style>#notif-panel.open{display:block;}</style>
+
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/charts.js"></script>
+<!-- Firebase / auth-guard / backend removed — fully simulated demo. -->
+<script src="../assets/js/demo-store.js"></script>
+<script src="../assets/js/dashboard.js"></script>
+<script src="../assets/js/earnings.js"></script>
+<script src="../assets/js/notifications.js"></script>
+</body>
+</html>

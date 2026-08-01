@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Assets — Vaultex (Demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/responsive.css">
+
+<style>
+  /* ============ All supported assets — scoped styles ============ */
+
+  .assets-widget { min-width: 0; }
+  .assets-widget .widget-head { flex-wrap: wrap; gap: 14px; align-items: flex-start; }
+  .assets-widget .widget-head h3 { margin: 0 0 2px; }
+  .assets-widget .widget-head p { margin: 0; font-size: .82rem; color: var(--muted); }
+
+  .assets-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-left: auto; }
+  .assets-search {
+    padding: 9px 14px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--ink-soft); color: var(--paper); font-size: .85rem;
+    min-width: 200px; outline: none; transition: border-color .15s;
+  }
+  .assets-search:focus { border-color: var(--accent, #6C7CFF); }
+  .assets-tabs { display: flex; gap: 6px; }
+  .assets-tabs button {
+    padding: 8px 12px; font-size: .78rem; border-radius: 6px;
+    border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer;
+  }
+  .assets-tabs button.active { background: var(--ink-soft); color: var(--paper); border-color: var(--accent, #6C7CFF); }
+
+  .assets-list-head {
+    display: grid; grid-template-columns: 2.2fr 1fr 1fr 1.1fr auto;
+    gap: 10px; padding: 10px 14px; margin-top: 14px;
+    font-size: .68rem; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--muted); font-family: 'JetBrains Mono', monospace;
+    border-bottom: 1px solid var(--line);
+  }
+  .assets-list-head span:nth-child(2),
+  .assets-list-head span:nth-child(3),
+  .assets-list-head span:nth-child(4) { text-align: right; }
+
+  .assets-rows { max-height: 680px; overflow-y: auto; }
+  .asset-row {
+    display: grid; grid-template-columns: 2.2fr 1fr 1fr 1.1fr auto;
+    gap: 10px; align-items: center; padding: 11px 14px;
+    border-bottom: 1px solid var(--line); transition: background .1s;
+  }
+  .asset-row:hover { background: var(--ink-soft); }
+  .asset-row:last-child { border-bottom: none; }
+
+  .asset-name-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .asset-icon { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; object-fit: contain; background: #fff; padding: 2px; box-sizing: border-box; }
+  .asset-name-text { min-width: 0; }
+  .asset-name { font-weight: 600; font-size: .88rem; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .asset-sym { font-size: .72rem; color: var(--muted); text-transform: uppercase; }
+
+  .asset-price { font-family: 'JetBrains Mono', monospace; font-size: .86rem; text-align: right; white-space: nowrap; }
+  .asset-pct { font-family: 'JetBrains Mono', monospace; font-size: .8rem; text-align: right; white-space: nowrap; }
+  .asset-pct.up { color: #16c784; }
+  .asset-pct.down { color: #ea3943; }
+  .asset-vol { font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: var(--muted); text-align: right; white-space: nowrap; }
+
+  .asset-actions { text-align: right; }
+  .asset-actions .btn { white-space: nowrap; }
+
+  .assets-empty { text-align: center; color: var(--muted); font-size: .85rem; padding: 32px 8px; }
+
+  .holding-cell { display: flex; align-items: center; gap: 10px; }
+  .holding-cell img { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; object-fit: contain; background: #fff; padding: 2px; box-sizing: border-box; }
+  .holding-tag { font-size: .62rem; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .03em; margin-left: 6px; }
+  .holding-tag.cash { background: rgba(0,217,163,.12); color: var(--mint); }
+  .holding-tag.trading { background: rgba(108,124,255,.14); color: #6C7CFF; }
+  .holding-tag.staked { background: rgba(242,184,75,.14); color: var(--gold); }
+  .pnl-up { color: #16c784; } .pnl-down { color: #ea3943; }
+
+  .deposit-history-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: .85rem; flex-wrap: wrap; }
+  .deposit-history-row:last-child { border-bottom: none; }
+  .deposit-history-row img { width: 24px; height: 24px; border-radius: 50%; object-fit: contain; background: #fff; padding: 2px; box-sizing: border-box; flex-shrink: 0; }
+  .deposit-history-row .dh-coin { font-weight: 600; min-width: 60px; }
+  .deposit-history-row .dh-amt { font-family: 'JetBrains Mono', monospace; color: var(--muted); flex: 1; min-width: 160px; }
+  .deposit-history-row .dh-usd { font-family: 'JetBrains Mono', monospace; color: var(--mint); margin-left: auto; }
+
+  @media (max-width: 900px) {
+    .assets-list-head, .asset-row { grid-template-columns: 2fr 1fr 1fr auto; }
+    .assets-list-head span:nth-child(4), .asset-vol { display: none; }
+  }
+  @media (max-width: 640px) {
+    .assets-toolbar { width: 100%; margin-left: 0; }
+    .assets-search { flex: 1; min-width: 0; }
+    .assets-list-head { display: none; }
+    .asset-row {
+      grid-template-columns: 1fr auto; row-gap: 6px; padding: 12px 10px;
+    }
+    .asset-price, .asset-pct { text-align: right; }
+    .asset-actions { grid-column: 1 / -1; text-align: left; margin-top: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="dash-shell">
+  <aside class="dash-sidebar">
+    <a href="../index.html" class="nav-logo"><span class="mark">V</span><span>Vaultex</span></a>
+    <nav class="dash-nav">
+      <!-- populated by dashboard.js -->
+    </nav>
+  </aside>
+
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div>
+        <button class="sidebar-burger" data-sidebar-toggle aria-label="Toggle menu"><span></span><span></span><span></span></button>
+        <h2 class="mb-0" style="font-size:1.5rem;">My assets</h2>
+        <p class="mb-0" style="font-size:.88rem;">Every balance in your account, in one place.</p>
+      </div>
+      <div class="flex" style="gap:14px;">
+        <button class="theme-toggle" aria-label="Toggle theme">☾</button>
+        <button class="theme-toggle" aria-label="Notifications" data-dropdown-trigger="notif-panel" style="position:relative;">⚑</button>
+        <button class="btn btn-ghost btn-sm" data-logout>Log out</button>
+      </div>
+    </div>
+
+    <div class="widget" style="margin-bottom:24px;">
+      <div class="widget-head"><h3>Holdings</h3><span class="mono" data-portfolio-total>$0.00</span></div>
+      <table class="data-table">
+        <thead><tr><th>Asset</th><th>Amount</th><th>Price</th><th>24h</th><th>Value</th><th>Unrealized P/L</th></tr></thead>
+        <tbody data-holdings-table>
+          <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Loading your balances…</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:.8rem;color:var(--muted);margin-top:12px;">Cash is your spendable demo balance (same figure shown on your Dashboard). Trading and Staked rows are open positions, repriced live — their value already reflects any profit or loss made there.</p>
+    </div>
+
+    <!-- Deposit history, grouped by coin — informational only, already
+         reflected in Cash above, not counted again here. -->
+    <div class="widget" id="deposit-history" style="margin-bottom:24px;">
+      <div class="widget-head">
+        <h3>Recent deposits by coin</h3>
+        <span class="pill pill-neutral" style="font-size:.68rem;">Already included in Cash above</span>
+      </div>
+      <div data-deposit-history-rows>
+        <div class="assets-empty">No deposits yet — make one from the Deposit page to see it here.</div>
+      </div>
+    </div>
+
+    <!-- All supported assets — full market list, Binance-style -->
+    <div class="widget assets-widget" id="all-assets" style="margin-bottom:24px;">
+      <div class="widget-head">
+        <div>
+          <h3>All supported assets</h3>
+          <p data-assets-count>Loading supported assets…</p>
+        </div>
+        <div class="assets-toolbar">
+          <input type="text" class="assets-search" placeholder="Search by name or symbol" data-assets-search>
+          <div class="assets-tabs" data-assets-tabs>
+            <button class="active" data-tab="All">All</button>
+            <button data-tab="Gainers">Gainers</button>
+            <button data-tab="Losers">Losers</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="assets-list-head">
+        <span>Asset</span><span>Price</span><span>24h change</span><span>24h volume</span><span></span>
+      </div>
+      <div class="assets-rows" data-assets-rows>
+        <div class="assets-empty">Loading live markets…</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="notif-panel" class="widget" style="position:fixed;top:70px;right:24px;width:340px;z-index:300;display:none;box-shadow:var(--shadow-card);">
+  <div class="widget-head"><h3>Notifications</h3></div>
+  <div data-notif-list></div>
+</div>
+<style>#notif-panel.open{display:block;}</style>
+
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/charts.js"></script>
+<!-- Firebase / auth-guard / portfolio.js removed — fully simulated demo. -->
+<script src="../assets/js/demo-store.js"></script>
+<script src="../assets/js/dashboard.js"></script>
+<script src="../assets/js/notifications.js"></script>
+
+<script>
+/**
+ * Vaultex — My Assets (Demo)
+ * Two independent things on this page:
+ *
+ * 1. HOLDINGS — real, from your account: Cash (your shared
+ *    DemoStore balance), open Trading positions
+ *    (vaultex_trading_holdings), and Staking positions — both
+ *    unstaked coin balances (vaultex_staking_holdings) and
+ *    currently-locked stakes (vaultex_staking_positions). Every
+ *    row is repriced against the live Binance ticker, so
+ *    unrealized P&L on open positions is real and moves with the
+ *    market. This is the same money as the Dashboard, Trading
+ *    Center, AutoTrading, Staking, and Withdrawals — just broken
+ *    down by asset instead of shown as one number.
+ *
+ * 2. ALL SUPPORTED ASSETS — a full Binance-style market
+ *    reference list (350+ live USDT pairs). Independent of your
+ *    holdings; just prices, for browsing/trading from.
+ *
+ * Both share one ticker fetch so prices always match.
+ */
+(function () {
+  'use strict';
+  const REST = 'https://api.binance.com/api/v3';
+  const EXCLUDE_RE = /(UP|DOWN|BULL|BEAR)USDT$/;
+
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+  const fmtUSD = n => '$' + (n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtPrice = n => {
+    if (n == null) return '—';
+    if (n >= 1) return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (n >= 0.01) return '$' + n.toFixed(4);
+    return '$' + n.toPrecision(3);
+  };
+  const fmtCompact = n => n == null ? '—' : '$' + Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 2 }).format(n);
+  const fmtPct = n => n == null ? '—' : `${n > 0 ? '+' : ''}${n.toFixed(2)}%`;
+  const fmtQty = n => (n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+
+  function coinLogoUrl(base) {
+    return `https://assets.coincap.io/assets/icons/${base.toLowerCase()}@2x.png`;
+  }
+  function avatarSVG(symbol) {
+    let h = 0;
+    for (let i = 0; i < symbol.length; i++) h = (Math.imul(31, h) + symbol.charCodeAt(i)) | 0;
+    const hue = Math.abs(h) % 360;
+    const initials = symbol.slice(0, 3);
+    const svg = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="20" r="20" fill="hsl(${hue},55%,32%)"/>
+      <text x="20" y="25" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="hsl(${hue},70%,85%)" text-anchor="middle">${initials}</text>
+    </svg>`;
+    return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  }
+  document.addEventListener('error', e => {
+    const img = e.target;
+    if (img && img.tagName === 'IMG' && img.dataset && img.dataset.coinBase) {
+      const base = img.dataset.coinBase;
+      delete img.dataset.coinBase;
+      img.src = avatarSVG(base);
+    }
+  }, true);
+
+  let ALL_ROWS = [];
+  let TICKER_MAP = new Map(); // symbol (e.g. BTCUSDT) -> {price, pct}
+  let currentTab = 'All';
+  let currentQuery = '';
+
+  async function loadTickers() {
+    try {
+      const res = await fetch(`${REST}/ticker/24hr`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      const rows = [];
+      const map = new Map();
+      data.forEach(t => {
+        if (!t.symbol.endsWith('USDT') || EXCLUDE_RE.test(t.symbol)) return;
+        const price = parseFloat(t.lastPrice);
+        const quoteVolume = parseFloat(t.quoteVolume);
+        if (!price || !isFinite(price)) return;
+        const row = { symbol: t.symbol, base: t.symbol.slice(0, -4), price, pct: parseFloat(t.priceChangePercent), quoteVolume };
+        rows.push(row);
+        map.set(t.symbol, row);
+      });
+      rows.sort((a, b) => b.quoteVolume - a.quoteVolume);
+      ALL_ROWS = rows;
+      TICKER_MAP = map;
+      renderAssets();
+      renderHoldings();
+    } catch (err) {
+      console.error('Vaultex assets: failed to load market list', err);
+      if (!ALL_ROWS.length) {
+        $('[data-assets-rows]').innerHTML = `<div class="assets-empty">Live market feed temporarily unavailable. Retrying…</div>`;
+        $('[data-assets-count]').textContent = 'Live market feed unavailable';
+      }
+    }
+  }
+
+  /* ---------------------------------------------------------
+     HOLDINGS — Cash + Trading positions + Staking positions,
+     all sourced from real local data, repriced live.
+  --------------------------------------------------------- */
+  const LS_TRADING_HOLD = 'vaultex_trading_holdings';       // { SYMBOL: { qty, costBasis } }
+  const LS_STAKE_HOLD   = 'vaultex_staking_holdings';       // { symbol: qty } (converted, not yet staked)
+  const LS_STAKE_POS    = 'vaultex_staking_positions';      // [{ symbol, amount, apy, startedAt, planLabel, ... }]
+
+  function getJSON(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch (e) { return fallback; }
+  }
+
+  function priceFor(symbolUpper) {
+    const row = TICKER_MAP.get(symbolUpper + 'USDT');
+    return row ? row.price : null;
+  }
+  function pctFor(symbolUpper) {
+    const row = TICKER_MAP.get(symbolUpper + 'USDT');
+    return row ? row.pct : null;
+  }
+
+  function computeStakeReward(stake) {
+    const elapsedMs = Date.now() - stake.startedAt;
+    const years = elapsedMs / (365 * 86400000);
+    return stake.amount * (stake.apy / 100) * years;
+  }
+
+  function renderHoldings() {
+    const tbody = $('[data-holdings-table]');
+    if (!tbody || !window.DemoStore) return;
+
+    const cash = DemoStore.getState().balance;
+    const tradingHold = getJSON(LS_TRADING_HOLD, {});
+    const stakeHold = getJSON(LS_STAKE_HOLD, {});
+    const stakePositions = getJSON(LS_STAKE_POS, []);
+
+    const rows = [];
+
+    // Cash — the same spendable balance shown on the Dashboard.
+    rows.push({
+      kind: 'cash', base: 'USDT', name: 'Tether (Cash)', qty: cash, price: 1, pct: 0,
+      value: cash, pnl: null,
+    });
+
+    // Open trading positions.
+    Object.keys(tradingHold).forEach(symbol => {
+      const pos = tradingHold[symbol];
+      if (!pos || !pos.qty) return;
+      const base = symbol.replace(/USDT$/, '');
+      const price = priceFor(base) ?? pos.costBasis;
+      const value = pos.qty * price;
+      const pnl = (price - pos.costBasis) * pos.qty;
+      rows.push({ kind: 'trading', base, name: base, qty: pos.qty, price, pct: pctFor(base), value, pnl });
+    });
+
+    // Staking — converted-but-not-staked coin balance.
+    Object.keys(stakeHold).forEach(symbol => {
+      const qty = stakeHold[symbol];
+      if (!qty) return;
+      const base = symbol.toUpperCase();
+      const price = priceFor(base) ?? 0;
+      rows.push({ kind: 'trading', base, name: base + ' (unstaked)', qty, price, pct: pctFor(base), value: qty * price, pnl: null });
+    });
+
+    // Staking — currently locked/earning stakes, grouped by coin.
+    const stakedBySymbol = {};
+    stakePositions.forEach(s => {
+      const key = s.symbol.toUpperCase();
+      const reward = computeStakeReward(s);
+      if (!stakedBySymbol[key]) stakedBySymbol[key] = 0;
+      stakedBySymbol[key] += s.amount + reward;
+    });
+    Object.keys(stakedBySymbol).forEach(base => {
+      const qty = stakedBySymbol[base];
+      const price = priceFor(base) ?? 0;
+      rows.push({ kind: 'staked', base, name: base + ' (staked)', qty, price, pct: pctFor(base), value: qty * price, pnl: null });
+    });
+
+    const total = rows.reduce((sum, r) => sum + r.value, 0);
+    const totalEl = $('[data-portfolio-total]');
+    if (totalEl) totalEl.textContent = fmtUSD(total);
+
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">No balances yet — make a demo deposit to get started.</td></tr>`;
+      return;
+    }
+
+    const tagFor = kind => kind === 'cash'
+      ? '<span class="holding-tag cash">Cash</span>'
+      : kind === 'staked' ? '<span class="holding-tag staked">Staked</span>' : '<span class="holding-tag trading">Trading</span>';
+
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>
+          <div class="holding-cell">
+            ${r.kind === 'cash' ? '' : `<img src="${coinLogoUrl(r.base)}" data-coin-base="${r.base}" alt="">`}
+            <div>${r.name}${tagFor(r.kind)}</div>
+          </div>
+        </td>
+        <td class="mono">${fmtQty(r.qty)}</td>
+        <td class="mono">${r.kind === 'cash' ? '$1.00' : fmtPrice(r.price)}</td>
+        <td class="mono ${r.pct == null ? '' : (r.pct >= 0 ? 'pnl-up' : 'pnl-down')}">${r.kind === 'cash' ? '—' : fmtPct(r.pct)}</td>
+        <td class="mono">${fmtUSD(r.value)}</td>
+        <td class="mono ${r.pnl == null ? '' : (r.pnl >= 0 ? 'pnl-up' : 'pnl-down')}">${r.pnl == null ? '—' : (r.pnl >= 0 ? '+' : '') + fmtUSD(r.pnl)}</td>
+      </tr>`).join('');
+  }
+
+  /* ---------------------------------------------------------
+     DEPOSIT HISTORY BY COIN — informational, already inside
+     the Cash row above; shown so every coin you've deposited is
+     visibly on this page, per-deposit.
+  --------------------------------------------------------- */
+  function renderDepositHistory() {
+    const container = $('[data-deposit-history-rows]');
+    if (!container || !window.DemoStore) return;
+
+    const deposits = DemoStore.getState().transactions
+      .filter(tx => tx.type === 'Deposit' && tx.status === 'finished')
+      .slice(0, 20);
+
+    if (!deposits.length) {
+      container.innerHTML = `<div class="assets-empty">No deposits yet — make one from the Deposit page to see it here.</div>`;
+      return;
+    }
+
+    container.innerHTML = deposits.map(tx => {
+      const meta = DemoStore.CURRENCY_META[tx.currency];
+      const label = meta ? meta.label : (tx.currency || '').toUpperCase();
+      const base = label.replace(/\s.*$/, '');
+      return `<div class="deposit-history-row">
+        <img src="${coinLogoUrl(base)}" data-coin-base="${base}" alt="">
+        <span class="dh-coin">${label}</span>
+        <span class="dh-amt">${tx.coinAmount.toFixed(6)} ${base} deposited · ${new Date(tx.ts).toLocaleDateString()}</span>
+        <span class="dh-usd">+${fmtUSD(tx.usdAmount)}</span>
+      </div>`;
+    }).join('');
+  }
+
+  /* ---------------------------------------------------------
+     ALL SUPPORTED ASSETS — full market reference list.
+  --------------------------------------------------------- */
+  function getFilteredRows() {
+    let rows = ALL_ROWS;
+    if (currentTab === 'Gainers') rows = rows.filter(r => r.pct > 0).sort((a, b) => b.pct - a.pct);
+    else if (currentTab === 'Losers') rows = rows.filter(r => r.pct < 0).sort((a, b) => a.pct - b.pct);
+    if (currentQuery) {
+      const q = currentQuery.toLowerCase();
+      rows = rows.filter(r => r.base.toLowerCase().includes(q) || r.symbol.toLowerCase().includes(q));
+    }
+    return rows;
+  }
+
+  function renderAssets() {
+    const container = $('[data-assets-rows]');
+    const countEl = $('[data-assets-count]');
+    if (!container) return;
+
+    countEl.textContent = `${ALL_ROWS.length} supported assets — live prices from the market`;
+
+    const rows = getFilteredRows();
+    if (!rows.length) {
+      container.innerHTML = `<div class="assets-empty">No assets match your search.</div>`;
+      return;
+    }
+
+    container.innerHTML = rows.map(r => {
+      const pctClass = r.pct >= 0 ? 'up' : 'down';
+      return `<div class="asset-row">
+        <div class="asset-name-cell">
+          <img class="asset-icon" src="${coinLogoUrl(r.base)}" data-coin-base="${r.base}" alt="" loading="lazy">
+          <div class="asset-name-text">
+            <div class="asset-name">${r.base}</div>
+            <div class="asset-sym">${r.base}/USDT</div>
+          </div>
+        </div>
+        <div class="asset-price">${fmtPrice(r.price)}</div>
+        <div class="asset-pct ${pctClass}">${fmtPct(r.pct)}</div>
+        <div class="asset-vol">${fmtCompact(r.quoteVolume)}</div>
+        <div class="asset-actions">
+          <a class="btn btn-ghost btn-sm" href="trading.html">Trade</a>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  $('[data-assets-search]')?.addEventListener('input', e => {
+    currentQuery = e.target.value.trim();
+    renderAssets();
+  });
+  $$('[data-assets-tabs] button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      $$('[data-assets-tabs] button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTab = btn.dataset.tab;
+      renderAssets();
+    });
+  });
+
+  /* ===== init ===== */
+  if (window.DemoStore) {
+    DemoStore.subscribe(() => { renderHoldings(); renderDepositHistory(); });
+  }
+  renderDepositHistory();
+  loadTickers();
+  setInterval(loadTickers, 30000);
+  // Trading/staking positions are local-only and don't fire DemoStore
+  // events, so re-render Holdings on a light poll too.
+  setInterval(renderHoldings, 5000);
+})();
+</script>
+</body>
+</html>
