@@ -65,7 +65,6 @@
       el('wd-detail-currency').textContent = asset;
       el('wd-detail-amount').textContent = `$${Math.abs(last.usdAmount).toFixed(2)}`;
       el('wd-detail-address').textContent = last.address;
-      el('wd-status-message').textContent = 'Completed instantly — demo mode has no admin review step.';
     }
   }
 
@@ -99,14 +98,5 @@
       addressInput.value = '';
       amountInput.value = '';
     });
-  }
-
-  // Unmissable demo notice, right under the button.
-  if (submitBtn) {
-    const notice = document.createElement('p');
-    notice.className = 'field-hint';
-    notice.style.cssText = 'margin-top:10px;color:var(--gold);';
-    notice.textContent = 'Demo mode: withdrawals settle instantly against your simulated balance — no real funds move and there is no admin review.';
-    submitBtn.insertAdjacentElement('afterend', notice);
   }
 })();
