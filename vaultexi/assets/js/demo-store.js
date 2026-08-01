@@ -66,7 +66,7 @@
     notifications: [
       { id: _id(), ts: Date.now() - 5 * 60 * 60 * 1000, title: 'Welcome to demo mode', body: 'This entire account is simulated. Try a demo deposit to get started — it will fund every part of the site: Trading, AutoTrading, Staking, and NFTs.', unread: false },
     ],
-    allocation: [{ label: 'Simulated balance', value: 10000, color: '#2ee6a6' }],
+    allocation: [{ label: 'Balance', value: 10000, color: '#2ee6a6' }],
   });
 
   function _id() {
