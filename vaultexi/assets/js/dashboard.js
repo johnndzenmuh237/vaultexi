@@ -235,7 +235,7 @@
 
     if (!botTrades.length) {
       el.innerHTML = `
-        <div class="widget-head"><h3>VaultexBotTrade <span class="demo-chip">Demo</span></h3><span class="pill pill-neutral">Inactive</span></div>
+        <div class="widget-head"><h3>VaultexBotTrade <span class="demo-chip">VBT</span></h3><span class="pill pill-neutral">Inactive</span></div>
         <p style="color:var(--muted);font-size:.85rem;margin:6px 0 14px;">No AutoTrading activity yet. Head to the AutoTrading page to run a simulated session — it uses this same balance.</p>
         <a href="autotrading.html" class="btn btn-primary btn-sm">Go to AutoTrading</a>
       `;
