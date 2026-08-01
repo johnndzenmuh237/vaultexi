@@ -279,7 +279,7 @@ img{display:block}
 <div class="modal-backdrop" id="stakeModal">
   <div class="modal-box">
     <button class="modal-close-x" id="stakeModalClose">✕</button>
-    <h3><img id="modalIcon" alt=""><span id="modalTitle">Stake ETH</span> <span class="demo-chip">Demo</span></h3>
+    <h3><img id="modalIcon" alt=""><span id="modalTitle">Stake ETH</span> <span class="demo-chip">STK</span></h3>
     <p class="modal-note" id="modalNote"></p>
 
     <div class="form-field">
@@ -361,28 +361,28 @@ img{display:block}
   function getHistory(){ try{ return JSON.parse(localStorage.getItem(LS_HIST)||'[]'); }catch(e){ return []; } }
   function setHistory(h){ localStorage.setItem(LS_HIST, JSON.stringify(h)); }
 
-  /* ===== staking pool + plan definitions ===== */
+  /* ===== staking pool + plan definitions (amounts & APY boosted to match the main build) ===== */
   const POOLS = [
-    { id:'bitcoin',    symbol:'btc',  name:'Bitcoin',   min:0.0005, plans:[
-      {label:'Flexible', apy:2.1, lockDays:0},{label:'30 Days', apy:3.2, lockDays:30},{label:'90 Days', apy:4.6, lockDays:90}] },
-    { id:'ethereum',   symbol:'eth',  name:'Ethereum',  min:0.01, plans:[
-      {label:'Flexible', apy:4.8, lockDays:0},{label:'30 Days', apy:6.5, lockDays:30},{label:'90 Days', apy:8.9, lockDays:90}] },
-    { id:'solana',     symbol:'sol',  name:'Solana',    min:1, plans:[
-      {label:'Flexible', apy:6.2, lockDays:0},{label:'30 Days', apy:8.1, lockDays:30},{label:'90 Days', apy:10.4, lockDays:90}] },
-    { id:'polkadot',   symbol:'dot',  name:'Polkadot',  min:5, plans:[
-      {label:'28 Days', apy:11.4, lockDays:28},{label:'90 Days', apy:14.2, lockDays:90}] },
-    { id:'cardano',    symbol:'ada',  name:'Cardano',   min:10, plans:[
-      {label:'Flexible', apy:3.9, lockDays:0},{label:'30 Days', apy:5.3, lockDays:30}] },
-    { id:'avalanche-2',symbol:'avax', name:'Avalanche', min:1, plans:[
-      {label:'Flexible', apy:7.5, lockDays:0},{label:'30 Days', apy:9.6, lockDays:30}] },
-    { id:'matic-network',symbol:'matic',name:'Polygon', min:10, plans:[
-      {label:'Flexible', apy:5.6, lockDays:0},{label:'30 Days', apy:7.4, lockDays:30}] },
-    { id:'chainlink',  symbol:'link', name:'Chainlink', min:1, plans:[
-      {label:'Flexible', apy:4.2, lockDays:0},{label:'30 Days', apy:5.9, lockDays:30}] },
-    { id:'cosmos',     symbol:'atom', name:'Cosmos',    min:1, plans:[
-      {label:'21 Days', apy:9.8, lockDays:21},{label:'90 Days', apy:12.6, lockDays:90}] },
-    { id:'tron',       symbol:'trx',  name:'Tron',      min:50, plans:[
-      {label:'Flexible', apy:4.5, lockDays:0},{label:'30 Days', apy:6.0, lockDays:30}] },
+    { id:'bitcoin',    symbol:'btc',  name:'Bitcoin',   min:0.002, plans:[
+      {label:'Flexible', apy:3.5, lockDays:0},{label:'30 Days', apy:5.0, lockDays:30},{label:'90 Days', apy:7.0, lockDays:90}] },
+    { id:'ethereum',   symbol:'eth',  name:'Ethereum',  min:0.03, plans:[
+      {label:'Flexible', apy:7.5, lockDays:0},{label:'30 Days', apy:9.0, lockDays:30},{label:'90 Days', apy:12.5, lockDays:90}] },
+    { id:'solana',     symbol:'sol',  name:'Solana',    min:3, plans:[
+      {label:'Flexible', apy:9.5, lockDays:0},{label:'30 Days', apy:12.0, lockDays:30},{label:'90 Days', apy:15.0, lockDays:90}] },
+    { id:'polkadot',   symbol:'dot',  name:'Polkadot',  min:15, plans:[
+      {label:'28 Days', apy:16.0, lockDays:28},{label:'90 Days', apy:19.5, lockDays:90}] },
+    { id:'cardano',    symbol:'ada',  name:'Cardano',   min:30, plans:[
+      {label:'Flexible', apy:6.0, lockDays:0},{label:'30 Days', apy:8.0, lockDays:30}] },
+    { id:'avalanche-2',symbol:'avax', name:'Avalanche', min:3, plans:[
+      {label:'Flexible', apy:11.0, lockDays:0},{label:'30 Days', apy:13.5, lockDays:30}] },
+    { id:'matic-network',symbol:'matic',name:'Polygon', min:25, plans:[
+      {label:'Flexible', apy:8.5, lockDays:0},{label:'30 Days', apy:10.5, lockDays:30}] },
+    { id:'chainlink',  symbol:'link', name:'Chainlink', min:3, plans:[
+      {label:'Flexible', apy:6.5, lockDays:0},{label:'30 Days', apy:8.5, lockDays:30}] },
+    { id:'cosmos',     symbol:'atom', name:'Cosmos',    min:3, plans:[
+      {label:'21 Days', apy:13.5, lockDays:21},{label:'90 Days', apy:16.5, lockDays:90}] },
+    { id:'tron',       symbol:'trx',  name:'Tron',      min:150, plans:[
+      {label:'Flexible', apy:7.0, lockDays:0},{label:'30 Days', apy:9.0, lockDays:30}] },
   ];
   let PRICES = {};
   let IMAGES = {};
