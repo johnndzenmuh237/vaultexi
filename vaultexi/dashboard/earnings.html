@@ -20,7 +20,6 @@
 @media (max-width:1024px){ .earn-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
 @media (max-width:560px){ .earn-grid{grid-template-columns:1fr;} }
 .earn-section-label{font-family:var(--font-mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;gap:8px;}
-.earn-notice{font-size:.76rem;color:var(--muted);background:var(--ink-soft, var(--ink-raise));border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:22px;}
 .btn-withdraw{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#00E5FF 0%,#7C5CFF 100%);color:#08111a;font-weight:700;border:none;border-radius:7px;padding:6px 14px;font-size:.72rem;letter-spacing:.01em;text-decoration:none;box-shadow:0 0 0 1px rgba(124,92,255,.25),0 4px 14px rgba(0,229,255,.18);transition:transform .15s ease,box-shadow .15s ease,filter .15s ease;}
 .btn-withdraw:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 0 0 1px rgba(124,92,255,.35),0 6px 20px rgba(0,229,255,.28);}
 .btn-withdraw:active{transform:translateY(0);filter:brightness(.96);}
@@ -60,8 +59,6 @@
       <div class="balance-amount">$0<span class="cents">.00</span></div>
       <span class="pill pill-neutral" data-balance-pill>— $0.00 this week</span>
     </div>
-
-    <div class="earn-notice">Every figure below comes from the same simulated balance shown on your Dashboard — Trading, AutoTrading, Staking, and NFT activity all post directly to it, and everything here is available on <a href="withdrawals.html" style="color:var(--paper);text-decoration:underline;">Withdrawals</a>.</div>
 
     <!-- Trading -->
     <div class="earn-section-label">Markets trading</div>
