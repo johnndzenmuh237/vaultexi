@@ -31,7 +31,7 @@
   'use strict';
 
   const STORAGE_KEY = 'vaultex_demo_ledger_v2';
-  const DEMO_LABEL = 'DEMO MODE · Simulated funds — not real money';
+  const DEMO_LABEL = 'ACTIVE';
   const DAILY_WITHDRAWAL_LIMIT = 100000;
 
   // Simulated USD rates — for demo display/conversion only, not live prices.
