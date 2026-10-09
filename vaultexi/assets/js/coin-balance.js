@@ -54,15 +54,7 @@
     return prices;
   }
 
-  function currentUser() {
-    return new Promise(resolve => {
-      if (window.auth && auth.currentUser) return resolve(auth.currentUser);
-      if (!window.auth) return resolve(null);
-      let done = false;
-      const off = auth.onAuthStateChanged(u => { if (!done) { done = true; off && off(); resolve(u || null); } });
-      setTimeout(() => { if (!done) { done = true; resolve(null); } }, 4000);
-    });
-  }
+  const currentUser = () => (window.VaultexDemo ? VaultexDemo.currentUser() : Promise.resolve(null));
   const once = (subscribe, uid, pickLimit) => new Promise(resolve => {
     let off = null, got = false;
     off = pickLimit
@@ -112,9 +104,9 @@
   window.VaultexBalances = { load, onChange, normalizeCoin, logoUrl };
 
   window.addEventListener('load', () => {
-    if (window.auth) auth.onAuthStateChanged(u => { if (u) load({ force: true }); });
+    if (window.VaultexDemo) VaultexDemo.whenUser(() => load({ force: true }));
   });
   window.addEventListener('vaultex:deposit-finished', () => load({ force: true }));
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && window.auth && auth.currentUser) load({ force: true }); });
-  setInterval(() => { if (window.auth && auth.currentUser && !document.hidden) load({ force: true }); }, 30000); // keep prices fresh
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && window.VaultexDemo) load({ force: true }); });
+  setInterval(() => { if (window.VaultexDemo && !document.hidden) load({ force: true }); }, 30000); // keep prices fresh
 })();
