@@ -9,8 +9,9 @@
          trading.html (practice-balance top-up) work unchanged.
    (Coin balances now come from the modified coin-balances.js.)
 
-   USAGE: add ONE tag on dashboard.html and trading.html,
-   right after firebase-init.js:
+   USAGE: add ONE tag on dashboard.html, assets.html and trading.html,
+   right after firebase-init.js (before dashboard.js / coin-balances.js
+   is fine, order doesn't matter):
      <script src="../assets/js/demo-bridge.js"></script>
    It loads demo-ledger.js itself if it isn't on the page.
    Remove the tag when you go live with real deposits.
@@ -25,16 +26,10 @@
     document.write('<script src="' + base + 'demo-ledger.js"><\/script>');
   }
 
+  const REST = 'https://api.binance.com/api/v3';
+
   /* ---- who is signed in ---- */
-  function getUser() {
-    return new Promise(resolve => {
-      if (window.auth && auth.currentUser) return resolve(auth.currentUser);
-      if (!window.auth) return resolve(null);
-      let done = false;
-      const off = auth.onAuthStateChanged(u => { if (!done) { done = true; off && off(); resolve(u || null); } });
-      setTimeout(() => { if (!done) { done = true; resolve(null); } }, 4000);
-    });
-  }
+  function getUser() { return window.VaultexDemo ? VaultexDemo.currentUser() : Promise.resolve(null); }
 
   function txSnapshot(uid) {
     return new Promise(resolve => {
@@ -44,7 +39,7 @@
   }
 
   /* ---------------------------------------------------------
-     /api/account/summary
+     1. /api/account/summary
   --------------------------------------------------------- */
   async function buildSummary() {
     const user = await getUser();
