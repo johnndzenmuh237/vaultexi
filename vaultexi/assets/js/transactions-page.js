@@ -95,9 +95,9 @@
     if (window.DemoStore) {
       DemoStore.subscribe(state => { storeTx = state.transactions || []; render(); });
     }
-    if (window.VaultexDemo && window.auth) {
-      auth.onAuthStateChanged(u => {
-        if (u) VaultexDemo.onTransactions(u.uid, list => { walletTx = list; render(); }, 100);
+    if (window.VaultexDemo) {
+      VaultexDemo.whenUser(u => {
+        VaultexDemo.onTransactions(u.uid, list => { walletTx = list; render(); }, 100);
       });
     }
     render();
