@@ -122,9 +122,8 @@
 
   /* ---------- demo wallet: net USD credited ---------- */
   function startDemoWallet() {
-    if (!window.VaultexDemo || !window.auth) return;
-    auth.onAuthStateChanged(u => {
-      if (!u) return;
+    if (!window.VaultexDemo) return;
+    VaultexDemo.whenUser(u => {
       demoActive = true;
       VaultexDemo.onTransactions(u.uid, list => {
         let net = 0;
