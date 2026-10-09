@@ -332,9 +332,8 @@
   }
 
   function startWallet() {
-    if (!hasWallet() || !window.auth) return;
-    auth.onAuthStateChanged(u => {
-      if (!u) return;
+    if (!hasWallet()) return;
+    VaultexDemo.whenUser(u => {
       VaultexDemo.onTransactions(u.uid, list => { walletTx = list; refresh(); }, 500);
       VaultexDemo.onWallet(u.uid, w => { walletCoins = w.coins; refresh(); });
     });
