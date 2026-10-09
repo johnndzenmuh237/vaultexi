@@ -97,6 +97,51 @@
   const fmtUSD = n => '$' + (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+  /* ---------- auth access that works whether or not window.auth exists ---------- */
+  function getAuth() {
+    try { if (window.auth && window.auth.onAuthStateChanged) return window.auth; } catch (e) {}
+    try { if (typeof auth !== 'undefined' && auth && auth.onAuthStateChanged) return auth; } catch (e) {}
+    try { if (window.firebase && firebase.apps && firebase.apps.length) return firebase.auth(); } catch (e) {}
+    return null;
+  }
+  /** Resolves with the signed-in user (or null after ~8s). */
+  function currentUser() {
+    return new Promise(resolve => {
+      let tries = 0;
+      const t = setInterval(() => {
+        const a = getAuth();
+        if (a && a.currentUser) { clearInterval(t); resolve(a.currentUser); }
+        else if (++tries > 80) { clearInterval(t); resolve(null); }
+      }, 100);
+    });
+  }
+  /** Calls cb(user) once auth is ready and a user is signed in (and again on re-login). */
+  function whenUser(cb) {
+    let tries = 0;
+    const t = setInterval(() => {
+      const a = getAuth();
+      if (a) { clearInterval(t); a.onAuthStateChanged(u => { if (u) cb(u); }); }
+      else if (++tries > 100) clearInterval(t);
+    }, 100);
+  }
+  async function debug() {
+    const u = await currentUser();
+    const out = { user: u && u.uid, keys: Object.keys(localStorage).filter(k => k.indexOf('vaultex_demo_') === 0) };
+    console.log('VaultexDemo debug', out);
+    return out;
+  }
+
+  /* Keep DemoStore (Trading / Staking / NFT balance) in step when it is on the page. */
+  function mirrorToStore(tx) {
+    try {
+      if (!window.DemoStore) return;
+      const dep = tx.type === 'deposit';
+      const label = (dep ? 'Deposit' : 'Withdrawal') + ' · ' + tx.coin;
+      if (dep && DemoStore.credit) DemoStore.credit(tx.usd, { category: 'Deposit', label, notify: false, extra: { wallet: true } });
+      else if (!dep && DemoStore.debit) DemoStore.debit(tx.usd, { category: 'Withdrawal', label, notify: false, extra: { wallet: true } });
+    } catch (e) { console.warn('VaultexDemo: could not mirror to DemoStore', e); }
+  }
+
   function saveTx(uid, tx) {
     const list = read(TKEY(uid), []);
     list.unshift(tx);
@@ -137,6 +182,7 @@
     };
     write(WKEY(uid), w);
     saveTx(uid, tx);
+    mirrorToStore(tx);
     emit('wallet', uid); emit('tx', uid);
     return tx;
   }
@@ -171,6 +217,7 @@
     };
     write(WKEY(uid), w);
     saveTx(uid, tx);
+    mirrorToStore(tx);
     emit('wallet', uid); emit('tx', uid);
     return tx;
   }
@@ -216,6 +263,7 @@
   window.VaultexDemo = {
     COINS, DAILY_LIMIT, getPrice, walletAddress, deposit, withdraw,
     onWallet, onTransactions, getTransaction, fmtQty, fmtUSD, esc, floor8,
+    getAuth, currentUser, whenUser, debug,
     receiptUrl: id => 'tx-receipt.html?id=' + encodeURIComponent(id),
   };
 })();
