@@ -14,69 +14,77 @@
 .lx{
   --l-bg:var(--ink-soft,#121A2E);--l-raise:var(--ink-raise,#1A2340);--l-line:var(--line,#262E45);
   --l-mut:var(--muted,#8993AB);--l-mint:var(--mint,#2EE6A6);--l-gold:var(--gold,#F5B942);--l-coral:var(--coral,#FF6B6B);
-  --l-mint-dim:var(--mint-dim,rgba(46,230,166,.14));
+  --l-mint-dim:var(--mint-dim,rgba(46,230,166,.14));--l-gold-dim:var(--gold-dim,rgba(245,185,66,.14));
   --l-mono:var(--font-mono,'JetBrains Mono',ui-monospace,monospace);--l-head:'Space Grotesk','Inter',system-ui,sans-serif;--l-r:var(--radius-md,16px);
-  color:var(--text,inherit);display:flex;flex-direction:column;gap:26px;width:100%;max-width:1000px;margin:0 auto;min-width:0;padding-bottom:60px;
+  color:var(--text,inherit);display:flex;flex-direction:column;gap:24px;width:100%;max-width:900px;margin:0 auto;min-width:0;padding-bottom:60px;
 }
 .lx *,.lx *::before,.lx *::after{box-sizing:border-box;}
 .lx h2,.lx h3{font-family:var(--l-head);margin:0;line-height:1.2;}
 .lx p{margin:0;line-height:1.6;}
 .muted{color:var(--l-mut);}
 [hidden]{display:none!important;}
-.lx-card{background:var(--l-bg);border:1px solid var(--l-line);border-radius:var(--l-r);padding:24px;min-width:0;}
-.lx-h{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.lx-card{background:var(--l-bg);border:1px solid var(--l-line);border-radius:var(--l-r);padding:22px;min-width:0;}
+.lx-h{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
 .lx-h h2{font-size:clamp(1.25rem,2.6vw,1.7rem);}
-.lx-h p{color:var(--l-mut);font-size:.94rem;max-width:62ch;}
-.lx-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;background:var(--l-mint);color:#03140F;font:600 .92rem 'Inter',system-ui,sans-serif;padding:12px 20px;border-radius:10px;cursor:pointer;min-height:46px;transition:transform .18s,box-shadow .18s,border-color .18s;text-decoration:none;}
+.lx-h p{color:var(--l-mut);font-size:.94rem;max-width:64ch;}
+.lx-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;background:var(--l-mint);color:#03140F;font:600 .9rem 'Inter',system-ui,sans-serif;padding:11px 18px;border-radius:10px;cursor:pointer;min-height:44px;transition:transform .18s,box-shadow .18s,border-color .18s,opacity .18s;text-decoration:none;}
 .lx-btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(46,230,166,.28);}
 .lx-btn.ghost{background:transparent;color:inherit;border-color:var(--l-line);}
 .lx-btn.ghost:hover{border-color:var(--l-mint);box-shadow:none;}
-.lx-btn.block{width:100%;}
+.lx-btn.sm{padding:7px 14px;font-size:.8rem;min-height:36px;}
+.lx-btn[disabled]{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
 .lx :focus-visible{outline:2px solid var(--l-mint);outline-offset:2px;}
 
 /* chat */
-.chat{padding:0;display:flex;flex-direction:column;overflow:hidden;border-color:var(--l-mint);}
-.chat-h{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--l-line);}
-.chat-av{width:40px;height:40px;border-radius:12px;background:var(--l-mint-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;font:700 .85rem var(--l-head);color:var(--l-mint);}
-.chat-t{flex:1;min-width:0;}
-.chat-t h3{font-size:1rem;}
-.chat-t p{font-size:.8rem;color:var(--l-mut);display:flex;align-items:center;gap:6px;}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--l-mint);flex-shrink:0;}
-.dot.ag{background:var(--l-gold);}
-.icon-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--l-line);background:transparent;color:var(--l-mint);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .2s,background .2s;}
-.icon-btn:hover,.icon-btn.on{border-color:var(--l-mint);background:var(--l-mint-dim);}
-.icon-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
-.msgs{height:min(58vh,440px);overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;}
-.m{max-width:85%;padding:10px 14px;border-radius:14px;font-size:.92rem;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;}
-.m.b,.m.a{align-self:flex-start;background:var(--l-raise);border:1px solid var(--l-line);border-bottom-left-radius:4px;}
-.m.a{border-color:var(--l-gold);}
-.m.u{align-self:flex-end;background:var(--l-mint);color:#03140F;border-bottom-right-radius:4px;}
-.m.s{align-self:center;background:none;color:var(--l-mut);font-size:.8rem;text-align:center;padding:2px;}
-.typing{color:var(--l-mut);font-style:italic;}
-.chips{display:flex;flex-wrap:wrap;gap:8px;align-self:flex-start;max-width:100%;}
-.chip{border:1px solid var(--l-line);background:transparent;color:inherit;font:500 .85rem 'Inter',system-ui,sans-serif;padding:9px 14px;border-radius:999px;cursor:pointer;min-height:40px;transition:border-color .2s,background .2s;}
-.chip:hover{border-color:var(--l-mint);background:var(--l-mint-dim);}
-.chip.go{border-color:var(--l-mint);color:var(--l-mint);}
-.chat-f{display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--l-line);}
-.chat-f input{flex:1;min-width:0;background:var(--l-raise);border:1px solid var(--l-line);color:inherit;border-radius:10px;padding:12px 14px;font:inherit;font-size:.95rem;}
-.chat-f input:focus{outline:none;border-color:var(--l-mint);box-shadow:0 0 0 3px var(--l-mint-dim);}
-.chat-f .lx-btn{padding:12px 18px;}
-.chat-x{padding:0 16px 12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.8rem;}
-.chat-x button{background:none;border:0;color:var(--l-mint);cursor:pointer;font:600 .8rem 'Inter',system-ui,sans-serif;padding:6px 0;min-height:36px;}
+.chat{padding:0;overflow:hidden;display:flex;flex-direction:column;}
+.chat-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--l-line);background:linear-gradient(180deg,var(--l-mint-dim),transparent);}
+.ava{width:42px;height:42px;border-radius:50%;background:var(--l-mint);color:#03140F;display:flex;align-items:center;justify-content:center;font-family:var(--l-mono);font-weight:700;flex-shrink:0;position:relative;}
+.ava::after{content:'';position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;background:var(--l-mint);border:2px solid var(--l-bg);animation:pulse 2s infinite;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(46,230,166,.55);}100%{box-shadow:0 0 0 9px rgba(46,230,166,0);}}
+.chat-title{flex:1 1 150px;min-width:0;}
+.chat-title h3{font-size:1.02rem;}
+.chat-title small{color:var(--l-mut);font-size:.76rem;}
+.tabs{display:flex;gap:4px;background:var(--l-raise);border-radius:10px;padding:3px;}
+.tabs button{position:relative;background:transparent;border:none;color:var(--l-mut);padding:7px 12px;border-radius:7px;font:600 .8rem 'Inter',sans-serif;cursor:pointer;white-space:nowrap;transition:background .2s,color .2s;}
+.tabs button.on{background:var(--l-bg);color:var(--l-mint);}
+.tabs .dot{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:var(--l-coral);}
+.mail-ico{width:40px;height:40px;border-radius:50%;border:1px solid var(--l-line);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .2s,transform .2s;color:inherit;text-decoration:none;}
+.mail-ico:hover{border-color:var(--l-mint);transform:translateY(-2px);}
+.mail-ico svg{width:20px;height:20px;stroke:var(--l-mint);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 
-.panel{border-color:var(--l-mint);display:flex;flex-direction:column;gap:14px;}
-.lx-f{display:flex;flex-direction:column;gap:6px;min-width:0;}
-.lx-f label{font-size:.8rem;font-weight:600;color:var(--l-mut);}
-.lx-f input,.lx-f select,.lx-f textarea{width:100%;min-width:0;background:var(--l-raise);border:1px solid var(--l-line);color:inherit;border-radius:10px;padding:12px 14px;font:inherit;font-size:.95rem;transition:border-color .2s,box-shadow .2s;}
-.lx-f input:focus,.lx-f select:focus,.lx-f textarea:focus{outline:none;border-color:var(--l-mint);box-shadow:0 0 0 3px var(--l-mint-dim);}
-.lx-f textarea{resize:vertical;min-height:130px;}
-.lx-f select option{background:#121A2E;color:#E8ECF6;}
-.lx-f .bad{border-color:var(--l-coral);}
-.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px;}
-.hint{font-size:.82rem;min-height:1.2em;}
-.hint.no{color:var(--l-coral);}.hint.ok{color:var(--l-mint);}
-.pbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
-.pbar .val{font-family:var(--l-mono);font-size:.88rem;overflow-wrap:anywhere;}
+.chat-log{height:clamp(340px,56vh,540px);overflow-y:auto;overscroll-behavior:contain;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;}
+.msg{display:flex;flex-direction:column;gap:4px;max-width:88%;animation:rise .3s ease both;min-width:0;}
+.msg small{font-size:.68rem;color:var(--l-mut);padding:0 4px;}
+.msg.me{align-self:flex-end;align-items:flex-end;}
+.msg.bot,.msg.agent{align-self:flex-start;}
+.msg.sys{align-self:center;max-width:94%;text-align:center;}
+.bub{padding:11px 14px;border-radius:14px;font-size:.9rem;line-height:1.55;overflow-wrap:anywhere;display:flex;flex-direction:column;gap:8px;}
+.bub p{margin:0;}
+.msg.bot .bub{background:var(--l-raise);border-top-left-radius:4px;}
+.msg.me .bub{background:var(--l-mint);color:#03140F;border-top-right-radius:4px;}
+.msg.agent .bub{background:var(--l-gold-dim);border:1px solid var(--l-gold);border-top-left-radius:4px;}
+.msg.sys .bub{background:transparent;color:var(--l-mut);font-size:.8rem;border:1px dashed var(--l-line);}
+.bub ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;}
+.bub .tail{color:var(--l-mut);font-size:.84rem;}
+.bub .acts{display:flex;gap:8px;flex-wrap:wrap;}
+.typing{flex-direction:row;gap:4px;align-items:center;padding:14px 16px;}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--l-mut);display:inline-block;animation:blink 1.1s infinite;}
+.typing i:nth-child(2){animation-delay:.18s;}.typing i:nth-child(3){animation-delay:.36s;}
+@keyframes blink{0%,80%,100%{opacity:.25;transform:translateY(0);}40%{opacity:1;transform:translateY(-3px);}}
+@keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 12px;}
+.chip{border:1px solid var(--l-line);background:transparent;color:inherit;border-radius:999px;padding:8px 14px;font:500 .82rem 'Inter',sans-serif;cursor:pointer;transition:border-color .2s,background .2s,transform .15s;}
+.chip:hover{border-color:var(--l-mint);transform:translateY(-1px);}
+.chip.primary{background:var(--l-mint);color:#03140F;border-color:var(--l-mint);font-weight:600;}
+.chat-form{display:flex;gap:10px;padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--l-line);}
+.chat-form input{flex:1;min-width:0;background:var(--l-raise);border:1px solid var(--l-line);color:inherit;border-radius:10px;padding:12px 14px;font:inherit;font-size:.95rem;transition:border-color .2s,box-shadow .2s;}
+.chat-form input:focus{outline:none;border-color:var(--l-mint);box-shadow:0 0 0 3px var(--l-mint-dim);}
+
+.mail-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.mail-row .txt{flex:1 1 220px;min-width:0;}
+.mail-row .val{font-family:var(--l-mono);font-size:.88rem;overflow-wrap:anywhere;margin-top:4px;}
+.mail-row .acts{display:flex;gap:10px;flex-wrap:wrap;}
 
 .lx-det{border:1px solid var(--l-line);border-radius:12px;background:var(--l-bg);overflow:hidden;transition:border-color .2s;}
 .lx-det[open]{border-color:var(--l-mint);}
@@ -84,12 +92,18 @@
 .lx-det summary::-webkit-details-marker{display:none;}
 .lx-det summary::after{content:'+';font-family:var(--l-mono);color:var(--l-mint);font-size:1.2rem;transition:transform .25s;flex-shrink:0;}
 .lx-det[open] summary::after{transform:rotate(45deg);}
-.lx-det .body{padding:0 16px 16px;color:var(--l-mut);font-size:.9rem;}
+.lx-det .body{padding:0 16px 16px;color:var(--l-mut);font-size:.9rem;animation:rise .3s ease both;}
 .stack{display:flex;flex-direction:column;gap:10px;}
-.toasts{position:fixed;top:max(14px,env(safe-area-inset-top));right:14px;z-index:999;width:min(92vw,340px);pointer-events:none;}
-.toast{pointer-events:auto;background:var(--ink-soft,#121A2E);color:var(--text,#E8ECF6);border:1px solid var(--line,#262E45);border-left:4px solid var(--mint,#2EE6A6);border-radius:12px;padding:12px 14px;font-size:.88rem;box-shadow:0 12px 32px rgba(0,0,0,.4);}
-@media (max-width:640px){.lx-card{padding:18px;}.chat{padding:0;}.m{max-width:92%;}.toasts{left:14px;right:14px;width:auto;}}
-@media (prefers-reduced-motion:reduce){.lx *,.toast{animation:none!important;transition:none!important;scroll-behavior:auto!important;}}
+.toasts{position:fixed;top:max(14px,env(safe-area-inset-top));right:14px;z-index:999;width:min(92vw,340px);pointer-events:none;display:flex;flex-direction:column;gap:10px;}
+.toast{pointer-events:auto;background:var(--ink-soft,#121A2E);color:var(--text,#E8ECF6);border:1px solid var(--line,#262E45);border-left:4px solid var(--mint,#2EE6A6);border-radius:12px;padding:12px 14px;font-size:.88rem;box-shadow:0 12px 32px rgba(0,0,0,.4);animation:rise .3s ease both;}
+@media (max-width:640px){
+  .lx-card{padding:18px;}.chat{padding:0;}
+  .chat-head{padding:12px;}
+  .tabs{order:5;width:100%;}.tabs button{flex:1;}
+  .chat-log{padding:12px;}.msg{max-width:94%;}.chips{padding:0 12px 10px;}.chat-form{padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px));}
+  .toasts{left:14px;right:14px;width:auto;}
+}
+@media (prefers-reduced-motion:reduce){.lx *,.toast{animation:none!important;transition:none!important;}.chat-log{scroll-behavior:auto;}}
 </style>
 </head>
 <body>
@@ -104,7 +118,7 @@
       <div>
         <button class="sidebar-burger" data-sidebar-toggle aria-label="Toggle menu"><span></span><span></span><span></span></button>
         <h2 class="mb-0" style="font-size:1.5rem;">Support</h2>
-        <p class="mb-0" style="font-size:.88rem;">We are here 24/7. Ask our assistant, or talk to an agent.</p>
+        <p class="mb-0" style="font-size:.88rem;">Instant answers, or a live agent when you need one.</p>
       </div>
       <div class="flex" style="gap:14px;">
         <button class="theme-toggle" aria-label="Toggle theme">☾</button>
@@ -114,48 +128,47 @@
 
     <div class="lx">
       <section>
-        <div class="lx-h"><h2>How can we help?</h2><p>Our assistant answers questions about withdrawals, deposits, transfers and loans instantly. If it can't solve your problem, you can chat with an agent.</p></div>
+        <div class="lx-h"><h2>How can we help?</h2><p>Our assistant replies automatically to withdrawal, deposit, transfer and loan questions. If it can't solve your problem, or you are not satisfied, an agent is one tap away.</p></div>
 
         <div class="lx-card chat">
-          <div class="chat-h">
-            <div class="chat-av" aria-hidden="true">AI</div>
-            <div class="chat-t"><h3 id="cTitle">Vaultex Assistant</h3><p><span class="dot" id="cDot"></span><span id="cSub">Replies instantly</span></p></div>
-            <button class="icon-btn" id="emailOpen" type="button" aria-label="Send an email" aria-expanded="false" title="Send an email">
+          <div class="chat-head">
+            <div class="ava">V</div>
+            <div class="chat-title"><h3 id="chatName">Vaultex Assistant</h3><small id="chatSub">Automatic replies · available 24/7</small></div>
+            <div class="tabs" role="tablist">
+              <button type="button" id="tabBot" class="on" role="tab" aria-selected="true">Assistant</button>
+              <button type="button" id="tabAgent" role="tab" aria-selected="false">Agent chat<span class="dot" id="agentDot" hidden></span></button>
+            </div>
+            <a class="mail-ico" id="mailIcon" href="mailto:vaultex71@gmail.com" aria-label="Email vaultex71@gmail.com" title="Email vaultex71@gmail.com">
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></svg>
-            </button>
+            </a>
           </div>
-          <div class="msgs" id="msgs" role="log" aria-live="polite"></div>
-          <div class="chat-x"><button type="button" id="toAgent">Chat with an agent</button><button type="button" id="toAI" hidden>Back to assistant</button></div>
-          <form class="chat-f" id="cForm" autocomplete="off">
-            <input id="cIn" type="text" maxlength="500" placeholder="Describe your problem" aria-label="Your message">
-            <button class="lx-btn" type="submit">Send</button>
+
+          <div class="chat-log" id="botLog" role="log" aria-live="polite"></div>
+          <div class="chat-log" id="agentLog" role="log" aria-live="polite" hidden></div>
+          <div class="chips" id="chips"></div>
+
+          <form class="chat-form" id="chatForm" autocomplete="off">
+            <input id="chatInput" maxlength="500" placeholder="Describe your problem…" aria-label="Your message">
+            <button type="submit" class="lx-btn" id="chatSend">Send</button>
           </form>
         </div>
       </section>
 
-      <section class="lx-card panel" id="mailPanel" hidden>
-        <div class="pbar"><h3>Send us an email</h3><div class="val">vaultex71@gmail.com</div></div>
-        <p class="muted" style="font-size:.9rem;">This opens your email app with everything filled in. Just press send.</p>
-        <div class="row">
-          <div class="lx-f"><label for="topic">Topic</label>
-            <select id="topic"><option>Withdrawal</option><option>Deposit</option><option>Loan application</option><option>Bank transfer</option><option>Account verification (KYC)</option><option>Something else</option></select></div>
-          <div class="lx-f"><label for="ref">Reference number (optional)</label><input id="ref" placeholder="e.g. VL123456 or TR123456" maxlength="20"></div>
-        </div>
-        <div class="lx-f"><label for="msg">Your message</label><textarea id="msg" maxlength="1500" placeholder="Tell us what happened and what you need help with"></textarea></div>
-        <div class="hint" id="mErr" role="alert"></div>
-        <div class="pbar" style="justify-content:flex-start;">
-          <button class="lx-btn" id="mailGo" type="button">Open in my email app</button>
-          <button class="lx-btn ghost" id="copyMail" type="button">Copy address</button>
-        </div>
+      <section class="lx-card mail-row">
+        <a class="mail-ico" id="mailIcon2" href="mailto:vaultex71@gmail.com" aria-label="Email vaultex71@gmail.com" style="width:48px;height:48px;">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></svg>
+        </a>
+        <div class="txt"><h3 style="font-size:1.02rem;">Prefer email?</h3><p class="muted" style="font-size:.88rem;">Send us the details and any screenshots.</p><div class="val">vaultex71@gmail.com</div></div>
+        <div class="acts"><a class="lx-btn sm" id="mailBtn" href="mailto:vaultex71@gmail.com">Send an email</a><button class="lx-btn sm ghost" id="copyMail" type="button">Copy address</button></div>
       </section>
 
       <section>
         <div class="lx-h"><h2>Quick answers</h2></div>
         <div class="stack">
-          <details class="lx-det"><summary>How long does a loan decision take?</summary><div class="body">Most pre-approvals take 24 to 72 hours. You will see the decision and a message from our team on your Loan page.</div></details>
+          <details class="lx-det"><summary>How long does a loan decision take?</summary><div class="body">Applications are reviewed within a maximum of 24 hours. Your Loan page shows Under review with a countdown, then the decision and a message from our team. After approval your account is credited within the next 24 hours.</div></details>
           <details class="lx-det"><summary>Why is my transfer pending?</summary><div class="body">Every transfer is reviewed before it is sent. The amount is deducted from your loan balance only after approval. If it is rejected, nothing is deducted and the message in your history explains what to do next.</div></details>
           <details class="lx-det"><summary>Why was my transfer rejected?</summary><div class="body">The most common reasons are incorrect bank details or missing verification. Open Transfer, then Transaction history, and read the message on that transfer. Fix what it asks for and submit again.</div></details>
-          <details class="lx-det"><summary>Where can I see my balance changes?</summary><div class="body">Your Loan page shows account activity with every credit and transfer, and your Transfer page shows your balance and full transaction history.</div></details>
+          <details class="lx-det"><summary>When can I access my security deposit?</summary><div class="body">Coins in your security balance stay locked. Your security deposit is accessible only after your loan amount is fully repaid.</div></details>
         </div>
       </section>
 
@@ -177,200 +190,358 @@
   'use strict';
   const $ = s => document.querySelector(s);
   const MAIL = 'vaultex71@gmail.com';
-  let who = { name: '', email: '' };
+  const FA = (typeof auth !== 'undefined' && auth) || firebase.auth();
+  const FD = (typeof db !== 'undefined' && db && db.collection) ? db : firebase.firestore();
+  const TS = () => firebase.firestore.FieldValue.serverTimestamp();
+
+  let who = { uid: '', name: '', email: '' };
+  const state = { mode: 'bot', topic: null, miss: 0 };
+  let agentMsgs = [], agentFirst = true;
+
+  /* ================= helpers ================= */
+  const botLog = $('#botLog'), agentLog = $('#agentLog');
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const timeStr = d => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const scrollDown = box => { box.scrollTop = box.scrollHeight; };
 
   function toast(t) {
-    const el = document.createElement('div');
-    el.className = 'toast'; el.textContent = t;
-    $('#toasts').appendChild(el);
-    setTimeout(() => { el.style.transition = 'opacity .4s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 400); }, 3500);
+    const e = el('div', 'toast', t);
+    $('#toasts').appendChild(e);
+    setTimeout(() => { e.style.transition = 'opacity .4s'; e.style.opacity = '0'; setTimeout(() => e.remove(), 400); }, 4500);
   }
 
-  /* ---------- Email ---------- */
-  function toggleMail(force) {
-    const p = $('#mailPanel'); p.hidden = force === undefined ? !p.hidden : !force;
-    $('#emailOpen').classList.toggle('on', !p.hidden);
-    $('#emailOpen').setAttribute('aria-expanded', String(!p.hidden));
-    if (!p.hidden) { p.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => $('#msg').focus({ preventScroll: true }), 400); }
+  function addMsg(kind, c, when, box) {
+    box = box || botLog;
+    const m = el('div', 'msg ' + kind), b = el('div', 'bub');
+    if (c.text) b.appendChild(el('p', null, c.text));
+    if (c.steps && c.steps.length) { const ol = el('ol'); c.steps.forEach(s => ol.appendChild(el('li', null, s))); b.appendChild(ol); }
+    if (c.tail) b.appendChild(el('p', 'tail', c.tail));
+    if (c.actions && c.actions.length) {
+      const row = el('div', 'acts');
+      c.actions.forEach(a => {
+        const cls = 'lx-btn sm' + (a.ghost ? ' ghost' : '');
+        let x;
+        if (a.href) { x = el('a', cls, a.label); x.href = a.href; } else { x = el('button', cls, a.label); x.type = 'button'; x.addEventListener('click', a.fn); }
+        row.appendChild(x);
+      });
+      b.appendChild(row);
+    }
+    m.appendChild(b);
+    if (kind !== 'sys') m.appendChild(el('small', null, (kind === 'agent' ? 'Agent · ' : kind === 'bot' ? 'Assistant · ' : '') + timeStr(when || new Date())));
+    box.appendChild(m); scrollDown(box);
+    return m;
   }
-  $('#emailOpen').addEventListener('click', () => toggleMail());
+
+  function typing(ms) {
+    const t = el('div', 'msg bot'), b = el('div', 'bub typing');
+    b.innerHTML = '<i></i><i></i><i></i>'; t.appendChild(b); botLog.appendChild(t); scrollDown(botLog);
+    return new Promise(r => setTimeout(() => { t.remove(); r(); }, ms || 700));
+  }
+
+  function setChips(list) {
+    const box = $('#chips'); box.innerHTML = '';
+    list.forEach(c => { const b = el('button', 'chip' + (c.primary ? ' primary' : ''), c.label); b.type = 'button'; b.addEventListener('click', c.fn); box.appendChild(b); });
+  }
+
+  /* ================= email ================= */
+  function mailHref() {
+    const subject = 'Vaultex support' + (state.topic ? ': ' + state.topic.label : '');
+    const body = 'Hello Vaultex support,\n\n(Describe your issue here)\n\n---\nName: ' + (who.name || '-') + '\nAccount email: ' + (who.email || '-');
+    return 'mailto:' + MAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  }
+  ['#mailIcon', '#mailIcon2', '#mailBtn'].forEach(id => $(id).addEventListener('click', e => { e.currentTarget.href = mailHref(); }));
   $('#copyMail').addEventListener('click', async () => {
     try { await navigator.clipboard.writeText(MAIL); toast('Email address copied'); }
     catch (e) { toast('Copy failed. The address is ' + MAIL); }
   });
-  $('#msg').addEventListener('input', e => e.target.classList.remove('bad'));
-  $('#mailGo').addEventListener('click', () => {
-    const msg = $('#msg').value.trim(), err = $('#mErr');
-    if (msg.length < 10) { err.className = 'hint no'; err.textContent = 'Please write a few words about what you need help with.'; $('#msg').classList.add('bad'); $('#msg').focus(); return; }
-    const topic = $('#topic').value, ref = $('#ref').value.trim();
-    const subject = 'Vaultex support: ' + topic + (ref ? ' (' + ref + ')' : '');
-    const body = msg + '\n\n---\nName: ' + (who.name || '-') + '\nAccount email: ' + (who.email || '-') + (ref ? '\nReference: ' + ref : '');
-    err.className = 'hint ok'; err.textContent = 'Opening your email app…';
-    window.location.href = 'mailto:' + MAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-  });
 
-  /* ---------- Assistant knowledge base (edit answers to match your policies) ---------- */
-  const KB = {
-    withdrawal: {
-      words: ['withdraw', 'withdrawal', 'cash out', 'payout', 'take out'],
-      label: 'Withdrawal',
-      d: 'Here is how withdrawals work:\n• Every withdrawal is reviewed before it is sent.\n• Your account must be verified (KYC) and your bank details must be exact.\n• Check Transfer, then Transaction history, for the status and any message on your request.\n\nIs your withdrawal pending, rejected, or not received yet?',
-      s: [
-        [['pending', 'processing', 'waiting', 'long'], 'A pending withdrawal is still under review. Reviews are not instant, so please allow some time. Nothing is lost while it is pending. If a message appears in your transaction history, follow what it asks.'],
-        [['reject', 'declin', 'denied', 'failed', 'fail'], 'A rejected withdrawal usually means incorrect bank details or missing verification. Open Transfer, then Transaction history, read the message on that request, fix what it asks for and submit again.'],
-        [['not received', "didn't receive", 'not arrive', 'never arrive', 'missing', 'not showing', 'not got'], 'If your withdrawal shows as approved but the money has not arrived, first confirm the account number and bank name you entered are correct, then allow your bank some time to credit it. If it still has not arrived, tell an agent your reference number so they can trace it.']
+  /* ================= automatic reply knowledge ================= */
+  const TOPICS = [
+    {
+      id: 'withdrawal', label: 'Withdrawal issue', link: ['Open Withdrawals', 'withdrawals.html'],
+      keys: ['withdraw', 'withdrawal', 'withdrawals', 'cash out', 'cashout', 'payout'],
+      intro: 'Sure, I can help with withdrawals. Which of these is closest to your problem?',
+      issues: [
+        { label: 'My withdrawal is still pending', keys: ['pending', 'waiting', 'delay', 'delayed', 'slow', 'long time', 'processing', 'not approved', 'how long'],
+          text: 'Withdrawals are reviewed by our team before they are sent, so a new request shows as Pending until it is approved.',
+          steps: ['Open Withdrawals and check the status of your request.', "While it is Pending, please don't submit it again. A second request can put more of your balance on hold.", 'When it is approved, your balance updates automatically.'],
+          tail: 'If it has stayed Pending for a long time, an agent can check it for you. Send them your reference.' },
+        { label: 'My withdrawal was rejected', keys: ['reject', 'rejected', 'declined', 'denied', 'failed', 'cancel', 'cancelled'],
+          text: 'A rejected withdrawal comes with a message from our team that says what to fix.',
+          steps: ['Open Withdrawals and read the message on that request.', 'The usual causes are a wrong wallet address or network, an amount above your available balance, or an unverified account (KYC).', 'Correct that and submit a new request.', 'If the amount is not back in your balance afterwards, talk to an agent.'] },
+        { label: 'I did not receive my withdrawal', keys: ['not received', 'didnt receive', 'have not received', 'havent received', 'missing', 'not arrived', 'hasnt arrived', 'not in my wallet', 'never came', 'not showing in my wallet'],
+          text: "Let's track it down.",
+          steps: ['Check that the request shows Approved on the Withdrawals page. Only approved withdrawals are sent.', 'Make sure the wallet address and network you entered match the wallet you are checking.', 'Give the network time to confirm, then look the transaction up on the blockchain explorer.', 'If it is approved and still missing, talk to an agent and give them your reference or transaction hash.'] },
+        { label: 'I cannot make a withdrawal', keys: ['cant', 'cannot', 'unable', 'insufficient', 'not enough', 'minimum', 'button', 'error', 'limit'],
+          text: 'These are the usual reasons a withdrawal cannot be submitted.',
+          steps: ['Check your available balance and enter an amount at or below it.', 'Make sure the wallet address and network are valid.', 'Complete KYC verification if your account is not verified yet.', 'Funds locked in your security balance cannot be withdrawn until your loan is fully repaid.'] }
       ]
     },
-    deposit: {
-      words: ['deposit', 'top up', 'topup', 'fund', 'add money', 'payment'],
-      label: 'Deposit',
-      d: 'Here is how deposits work:\n• A deposit appears in your balance once it has been confirmed.\n• Make sure you used the payment details shown on your Deposit page.\n• Keep your payment receipt or reference number.\n\nHas your deposit not shown up, or did something go wrong when paying?',
-      s: [
-        [['not show', 'not reflect', 'not credited', "didn't", 'missing', 'not appear', 'not update', 'pending', 'delay'], 'A deposit shows in your balance after it is confirmed, which can take a little time. Check your Loan page account activity and your transaction history. If it is still missing, chat with an agent and have your payment receipt and reference ready.'],
-        [['wrong', 'mistake', 'error', 'refund'], 'If you sent a deposit with wrong details or by mistake, do not send it again. An agent needs to look at it. Please chat with an agent and have your receipt and reference number ready.']
+    {
+      id: 'deposit', label: 'Deposit issue', link: ['Open Deposits', 'deposits.html'],
+      keys: ['deposit', 'deposits', 'deposited', 'fund my', 'add funds', 'add money', 'sent crypto'],
+      intro: 'I can help with deposits. What is going on?',
+      issues: [
+        { label: 'My deposit is not showing', keys: ['not showing', 'not reflecting', 'not reflected', 'not credited', 'not received', 'didnt receive', 'missing', 'balance is 0', 'balance zero', 'hasnt arrived', 'not arrived', 'pending', 'waiting', 'how long'],
+          text: 'A balance only appears after your deposit is confirmed on your account.',
+          steps: ['Open Deposits and check the status of your deposit.', 'Make sure you sent the right coin on the right network to the deposit address shown on the Deposits page.', 'Wait for the network to confirm your transaction, then refresh the page.', 'If it still does not show, talk to an agent and give them your transaction hash.'] },
+        { label: 'I used the wrong network or address', keys: ['wrong network', 'wrong address', 'wrong coin', 'wrong chain', 'different network', 'different address', 'sent to wrong'],
+          text: 'Please do not send again yet. Funds sent on a different network or coin cannot be credited automatically, but our team can review it.',
+          steps: ['Copy your transaction hash, the coin, the network and the address you sent to.', 'Talk to an agent right away and share those details.'] },
+        { label: 'How do I make a deposit?', keys: ['how', 'where', 'address', 'make a deposit', 'how to deposit', 'qr', 'fund my account', 'add funds', 'add money'],
+          text: 'Here is how to deposit.',
+          steps: ['Open Deposits.', 'Choose the coin and the network.', 'Copy the deposit address, or scan the QR code, and send from your wallet.', 'Your balance updates after the network confirms.'] }
       ]
     },
-    transfer: {
-      words: ['transfer', 'send money', 'sent money', 'bank transfer', 'wire'],
-      label: 'Transfer',
-      d: 'Here is how transfers work:\n• Every transfer is reviewed before it is sent.\n• The amount is deducted from your loan balance only after approval.\n• If it is rejected, nothing is deducted and the message in your history explains what to do next.\n\nIs your transfer pending or rejected?',
-      s: [
-        [['pending', 'processing', 'waiting', 'long'], 'A pending transfer is waiting for review. The amount is only deducted from your loan balance after it is approved. You can follow the status in Transfer, then Transaction history.'],
-        [['reject', 'declin', 'denied', 'failed', 'fail'], 'The most common reasons are incorrect bank details or missing verification. Open Transfer, then Transaction history, read the message on that transfer, fix what it asks for and submit again. Nothing is deducted for a rejected transfer.'],
-        [['balance', 'deduct', 'charged', 'money gone'], 'The amount is deducted from your loan balance only after a transfer is approved. Your Loan page shows every credit and transfer, and your Transfer page shows your balance and full history.']
+    {
+      id: 'transfer', label: 'Transfer issue', link: ['Open Transfer', 'transfer.html'],
+      keys: ['transfer', 'transfers', 'bank transfer', 'send to my bank', 'bank details', 'iban', 'swift', 'swap', 'swapping'],
+      intro: 'I can help with transfers. Which of these is closest?',
+      issues: [
+        { label: 'My transfer is pending', keys: ['pending', 'waiting', 'delay', 'processing', 'how long', 'under review', 'not approved'],
+          text: 'Every transfer is reviewed before it is sent.',
+          steps: ['Open Transfer and look at Transaction history.', 'Pending means it is waiting for approval. The amount is on hold so you cannot spend it twice.', 'The amount is deducted from your loan balance only after approval, and you will see a pop-up when a decision arrives.'] },
+        { label: 'My transfer was rejected', keys: ['reject', 'rejected', 'declined', 'denied', 'failed', 'cancel'],
+          text: 'A rejected transfer always comes with a message saying why and what to do.',
+          steps: ['Open Transfer, then Transaction history, and go to the Rejected tab.', 'Read the message. It may ask you to correct your bank details or complete verification.', 'Submit a new transfer after fixing it. Nothing is deducted when a transfer is rejected.'] },
+        { label: 'I cannot start a transfer', keys: ['cant', 'cannot', 'unable', 'insufficient', 'not enough', 'minimum', 'available', 'balance', 'error', 'limit'],
+          text: 'These are the usual reasons.',
+          steps: ['You can transfer up to the Available to transfer amount at the top of the Transfer page. The minimum is $1.00.', 'Pending transfers are on hold and lower what is available.', 'Fill in the account holder, bank, account number or IBAN, SWIFT or routing code and country, tick the confirmation box and press Review transfer.'] },
+        { label: 'How do I swap my loan balance to crypto?', keys: ['swap', 'swapping', 'convert', 'exchange', 'to crypto', 'crypto assets', 'into crypto', 'buy crypto', 'loan balance to'],
+          text: 'You can swap your loan balance into a crypto asset instead of sending it to a bank.',
+          steps: ['Open Transfer and choose the Swap to crypto assets tab.', 'Pick the asset, then enter the amount in USD. The coin amount fills in automatically at the live price.', 'Press Review swap, then Swap now. The amount is deducted from your loan balance instantly and the coins appear in your Assets.', 'You can swap up to your available loan balance, and the smallest swap is $1.00.'] },
+        { label: 'My swap is not showing in my assets', keys: ['not showing in my assets', 'swap not showing', 'swapped but', 'not in my assets', 'assets not updated', 'swap missing', 'swap not received'],
+          text: 'A completed swap appears in your history right away and the coins are added to your assets.',
+          steps: ['Open Transfer and check Transaction history for the swap. It shows as Successful when it is done.', 'Open Assets and refresh the page. The coins appear under Holdings.', 'If the swap is Successful but the coins are missing after a refresh, talk to an agent and mention the asset and the time of the swap.'] },
+        { label: 'It was approved but my bank has not got it', keys: ['approved', 'successful', 'sent', 'bank not received', 'not arrived', 'not received', 'hasnt arrived', 'didnt receive', 'missing'],
+          text: 'Once a transfer shows Successful, it has been sent and deducted from your loan balance.',
+          steps: ['Check the bank details on that transfer in your history.', 'Bank arrival times depend on your bank, so allow some time.', 'If it is still missing, talk to an agent with your transfer reference (it starts with TR).'] }
       ]
     },
-    loan: {
-      words: ['loan', 'borrow', 'credit', 'pre-approval', 'approval', 'approved', 'apply'],
-      label: 'Loan',
-      d: 'Here is how loans work:\n• Most pre-approvals take 24 to 72 hours.\n• You will see the decision and a message from our team on your Loan page.\n• Complete account verification (KYC) so your application is not held up.\n\nAre you waiting on a decision, or was something declined?',
-      s: [
-        [['how long', 'waiting', 'pending', 'review', 'status', 'decision', 'still'], 'Most pre-approvals take 24 to 72 hours. Open your Loan page to see the decision and any message from our team. If it has been longer than 72 hours, chat with an agent and share your reference number.'],
-        [['reject', 'declin', 'denied', 'not approved'], 'Open your Loan page and read the message from our team, it explains the reason and what to do next. Often it is missing verification or incomplete details. Fix what it asks for and apply again, or chat with an agent if the reason is unclear.']
+    {
+      id: 'loan', label: 'Loan issue', link: ['Open Loan page', 'loan.html'],
+      keys: ['loan', 'loans', 'borrow', 'apply for', 'application', 'eligible', 'repay', 'repayment', 'security deposit', 'security balance', 'security', 'mortgage'],
+      intro: 'I can help with loans. What do you need?',
+      issues: [
+        { label: 'How do I apply?', keys: ['how', 'apply', 'application', 'get a loan', 'start', 'minimum'],
+          text: 'Here is how a loan application works.',
+          steps: ['Choose your loan amount. The minimum is $1,000.', 'Make sure your security balance covers 10% of that amount. Top up from your crypto assets if it does not.', 'Fill in the form, tick the Terms and Conditions box and press Submit.', 'Your application then shows as Under review for a maximum of 24 hours.'] },
+        { label: "It says I'm not eligible", keys: ['not eligible', 'eligible', 'no security', 'security assets', 'top up', 'topup', 'cant apply', 'cannot apply', '10%', 'security balance', 'security'],
+          text: 'To send an application, your security balance must cover 10% of the loan amount. This serves for document processing and legal stamps.',
+          link: ['Top up security balance', 'assets.html?topup=security'],
+          steps: ['Open Assets with the button below.', 'Tap Use for security on a coin you hold, enter the amount in USD and the coin amount fills in automatically.', 'Press Proceed. The coins move into your security balance and you go back to your application.', 'Tick the Terms and Conditions box and press Submit.'] },
+        { label: 'Where is my application?', keys: ['status', 'review', 'under review', 'pending', 'waiting', 'how long', 'decision', 'where is my'],
+          text: 'While your application is being reviewed, the top of your Loan page shows Under review with a 24 hour countdown. Our team gives a decision within a maximum of 24 hours.',
+          steps: ['Open the Loan page and look at the banner at the top.', 'When it is decided you will see the result with a message from our team.'] },
+        { label: 'I was approved but not credited', keys: ['approved', 'credited', 'funds', 'not credited', 'didnt get', 'money', 'received', 'congratulations'],
+          text: 'After approval, your account is credited within the next 24 hours.',
+          steps: ['Check Wallet balance and Account activity on your Loan page.', 'If 24 hours have passed since approval and nothing was credited, talk to an agent and give them your application reference (it starts with VL).'] },
+        { label: 'My application was declined', keys: ['declined', 'rejected', 'not approved', 'denied', 'refused'],
+          text: 'A declined application always comes with a message from our team.',
+          steps: ['Open your Loan page and read the message. It says why and what to do next.', 'Fix what it asks for, then apply again. Your security deposit stays in your security balance and is available for your next application.'] },
+        { label: 'When can I access my security deposit?', keys: ['security deposit', 'access', 'locked', 'unlock', 'release', 'get back', 'refund'],
+          text: 'Coins in your security balance stay locked. Your security deposit is accessible only after your loan amount is fully repaid.', steps: [] }
       ]
     },
-    kyc: {
-      words: ['kyc', 'verify', 'verification', 'identity', 'id document'],
-      label: 'Verification',
-      d: 'Verification (KYC) is needed for loans, transfers and withdrawals. Complete it from your account page and make sure your documents are clear and match your account details. If your verification is stuck, chat with an agent.',
-      s: []
+    {
+      id: 'kyc', label: 'KYC verification', link: ['Open KYC', 'kyc.html'],
+      keys: ['kyc', 'verification', 'verify', 'verified', 'identity', 'selfie', 'passport', 'id card'],
+      intro: 'I can help with KYC verification. What happened?',
+      issues: [
+        { label: 'How do I get verified?', keys: ['how', 'verify', 'verification', 'start', 'submit', 'upload'],
+          text: 'Here is how to verify.',
+          steps: ['Open KYC and fill in your details exactly as they appear on your ID.', 'Upload a clear photo of your ID and a selfie holding it.', 'Tick the box and submit. The status shows Under review until our team decides.'] },
+        { label: 'My KYC was rejected', keys: ['reject', 'rejected', 'declined', 'not approved', 'failed'],
+          text: 'A rejected KYC request always includes a message from our team.',
+          steps: ['Open KYC. The message there says why it was rejected and what to fix.', 'Common reasons are a blurry photo, a selfie that does not match, details that differ from the ID, or an expired ID.', 'Correct it and submit again.'] },
+        { label: 'It is taking long', keys: ['pending', 'review', 'waiting', 'how long', 'taking long'],
+          text: 'Your KYC page shows the current status.',
+          steps: ['Open KYC to see the status.', 'If it has been a long time, talk to an agent and give them your KYC reference (it starts with KY).'] }
+      ]
+    },
+    {
+      id: 'account', label: 'Account access', link: null,
+      keys: ['password', 'login', 'log in', 'sign in', 'hacked', '2fa', 'locked out', 'forgot', 'reset'],
+      intro: '', issues: [],
+      text: 'For account access and security questions I need to connect you with an agent, so they can help you safely.'
     }
-  };
-  const ESC_WORDS = ['agent', 'human', 'person', 'representative', 'someone', 'complain', 'not helpful', 'useless', 'not satisfied', 'unsatisfied', "didn't help", 'no help', 'not solved', 'still not'];
-  const THANKS = ['thanks', 'thank you', 'thx', 'solved', 'fixed', 'resolved', 'it works', 'all good'];
-  const GREET = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening'];
+  ];
 
-  const msgs = $('#msgs');
-  let agent = false, fails = 0, lastTopic = null, chatRef = null, unsub = null;
+  /* ================= understanding what the user typed ================= */
+  const norm = s => ' ' + String(s).toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9% ]/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
+  const has = (t, key) => key.length <= 4 ? new RegExp('\\b' + key + '(\\b|$)').test(t) : t.indexOf(key) > -1;
+  const score = (t, keys) => keys.reduce((s, k) => s + (has(t, k) ? (k.indexOf(' ') > -1 ? 3 : 1) : 0), 0);
 
-  function scroll() { msgs.scrollTop = msgs.scrollHeight; }
-  function add(text, cls) { const d = document.createElement('div'); d.className = 'm ' + cls; d.textContent = text; msgs.appendChild(d); scroll(); return d; }
-  function chips(list) {
-    const w = document.createElement('div'); w.className = 'chips';
-    list.forEach(c => {
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'chip' + (c.go ? ' go' : ''); b.textContent = c.t;
-      b.addEventListener('click', () => { w.remove(); c.f(); });
-      w.appendChild(b);
+  function understand(raw) {
+    const t = norm(raw);
+    if (/\b(agent|human|real person|representative|operator|customer service|customer care|live chat)\b/.test(t)) return { type: 'agent' };
+    if (/(not helpful|didnt help|did not help|doesnt help|useless|not solved|still not|still having|not satisfied|unsatisfied|wrong answer|you cant help|you cannot help|not working)/.test(t)) return { type: 'bad' };
+    if (/\b(thanks|thank you|thx|appreciate)\b/.test(t)) return { type: 'thanks' };
+    if (t.trim().split(' ').length <= 4 && /^ (hi|hello|hey|yo|good morning|good afternoon|good evening)/.test(t)) return { type: 'greet' };
+
+    let best = null, bestScore = 0;
+    TOPICS.forEach(tp => { const s = score(t, tp.keys); if (s > bestScore) { best = tp; bestScore = s; } });
+    if (!best && state.topic && state.topic.issues.some(i => score(t, i.keys) > 0)) best = state.topic;   // short follow-ups like "pending" stay on the same topic
+    if (!best) return { type: 'none' };
+    if (!best.issues.length) return { type: 'topic', topic: best };
+    let issue = null, is = 0;
+    best.issues.forEach(i => { const s = score(t, i.keys); if (s > is) { issue = i; is = s; } });
+    return issue ? { type: 'issue', topic: best, issue: issue } : { type: 'topic', topic: best };
+  }
+
+  /* ================= conversation ================= */
+  const topicChips = () => TOPICS.filter(t => t.id !== 'account').map(t => ({ label: t.label, fn: () => pickTopic(t) }))
+    .concat([{ label: 'Talk to an agent', primary: true, fn: () => goAgent() }]);
+
+  function showMenu(text) {
+    addMsg('bot', { text: text || 'Which area is your problem in?' });
+    setChips(topicChips());
+  }
+
+  async function pickTopic(t) {
+    addMsg('me', { text: t.label }); setChips([]);
+    await typing(600);
+    topicIntro(t);
+  }
+
+  function topicIntro(t) {
+    state.topic = t; state.miss = 0;
+    if (!t.issues.length) { agentOffer(t.text); return; }
+    addMsg('bot', { text: t.intro });
+    setChips(t.issues.map(i => ({ label: i.label, fn: () => pickIssue(t, i) }))
+      .concat([{ label: 'Something else', fn: () => showMenu() }, { label: 'Talk to an agent', primary: true, fn: () => goAgent() }]));
+  }
+
+  async function pickIssue(t, i) {
+    addMsg('me', { text: i.label }); setChips([]);
+    await typing(700);
+    answerIssue(t, i);
+  }
+
+  async function answerIssue(t, i) {
+    state.topic = t; state.miss = 0;
+    const link = i.link || t.link;
+    addMsg('bot', { text: i.text, steps: i.steps, tail: i.tail, actions: link ? [{ label: link[0], href: link[1] }] : [] });
+    await typing(600);
+    addMsg('bot', { text: 'Did that solve your problem?' });
+    setChips([
+      { label: 'Yes, it is solved', primary: true, fn: solved },
+      { label: 'No, I still need help', fn: notSolved },
+      { label: 'Other issue', fn: () => { addMsg('me', { text: 'Other issue' }); showMenu(); } }
+    ]);
+  }
+
+  async function solved() {
+    addMsg('me', { text: 'Yes, it is solved' }); setChips([]);
+    await typing(500);
+    addMsg('bot', { text: "Great, I'm glad that is sorted. Is there anything else I can help you with?" });
+    setChips(topicChips());
+  }
+
+  async function notSolved() {
+    addMsg('me', { text: 'No, I still need help' }); setChips([]);
+    await typing(500);
+    agentOffer("I'm sorry that did not solve it. I'll connect you with an agent who can look at your case and reply right here.");
+  }
+
+  function agentOffer(text) {
+    addMsg('bot', { text: text, actions: [
+      { label: 'Chat with an agent', fn: () => goAgent() },
+      { label: 'Email ' + MAIL, href: mailHref(), ghost: true }
+    ] });
+    setChips([{ label: 'Chat with an agent', primary: true, fn: () => goAgent() }, { label: 'Back to topics', fn: () => showMenu() }]);
+  }
+
+  async function userSays(text) {
+    addMsg('me', { text: text }); setChips([]);
+    await typing(650);
+    const r = understand(text);
+    if (r.type === 'agent') { addMsg('bot', { text: 'Of course, I am switching you to a live agent chat.' }); setTimeout(goAgent, 700); return; }
+    if (r.type === 'bad') { agentOffer("I'm sorry I could not help enough. Let me connect you with an agent."); return; }
+    if (r.type === 'thanks') { addMsg('bot', { text: "You're welcome! Is there anything else I can help you with?" }); setChips(topicChips()); return; }
+    if (r.type === 'greet') { addMsg('bot', { text: 'Hello! I can help with withdrawals, deposits, transfers, loans and KYC. Pick a topic or describe your problem.' }); setChips(topicChips()); return; }
+    if (r.type === 'issue') { answerIssue(r.topic, r.issue); return; }
+    if (r.type === 'topic') { topicIntro(r.topic); return; }
+    state.miss++;
+    if (state.miss >= 2) { agentOffer("I'm still not sure I understand, and I don't want to waste your time. An agent can help you directly."); return; }
+    showMenu("I'm not sure I understood that. Which of these is closest to your problem?");
+  }
+
+  /* ================= live agent chat (Firestore) ================= */
+  function setMode(m) {
+    state.mode = m;
+    const agent = m === 'agent';
+    $('#tabBot').classList.toggle('on', !agent); $('#tabAgent').classList.toggle('on', agent);
+    $('#tabBot').setAttribute('aria-selected', String(!agent)); $('#tabAgent').setAttribute('aria-selected', String(agent));
+    botLog.hidden = agent; agentLog.hidden = !agent; $('#chips').hidden = agent;
+    $('#chatName').textContent = agent ? 'Vaultex Agent' : 'Vaultex Assistant';
+    $('#chatSub').textContent = agent ? 'Live chat · our team replies here' : 'Automatic replies · available 24/7';
+    $('#chatInput').placeholder = agent ? 'Message an agent…' : 'Describe your problem…';
+    if (agent) { $('#agentDot').hidden = true; renderAgent(); } else scrollDown(botLog);
+    $('#chatInput').focus({ preventScroll: true });
+  }
+  function goAgent() { setMode('agent'); }
+  $('#tabBot').addEventListener('click', () => setMode('bot'));
+  $('#tabAgent').addEventListener('click', () => setMode('agent'));
+
+  function renderAgent() {
+    agentLog.innerHTML = '';
+    addMsg('sys', { text: "You're chatting with a Vaultex agent. Write your message below and our team will reply here. You can also email " + MAIL + '.' }, null, agentLog);
+    if (state.topic) addMsg('sys', { text: 'Topic: ' + state.topic.label }, null, agentLog);
+    agentMsgs.forEach(m => {
+      const when = m.createdAt && m.createdAt.toDate ? m.createdAt.toDate() : new Date();
+      addMsg(m.from === 'admin' ? 'agent' : 'me', { text: m.text }, when, agentLog);
     });
-    msgs.appendChild(w); scroll();
-  }
-  const has = (txt, arr) => arr.some(w => txt.includes(w));
-
-  function topicChips() {
-    chips(Object.keys(KB).filter(k => k !== 'kyc').map(k => ({ t: KB[k].label + ' issue', f: () => { add(KB[k].label + ' issue', 'u'); answer(k, ''); } })));
-  }
-  function escalateChips() {
-    chips([
-      { t: 'Chat with an agent', go: true, f: startAgent },
-      { t: 'Send an email', f: () => toggleMail(true) }
-    ]);
-  }
-  function followUp() {
-    chips([
-      { t: 'Yes, solved', f: () => { add('Yes, solved', 'u'); fails = 0; reply('Glad that helped. Anything else I can help with?', topicChips); } },
-      { t: 'No, I need more help', f: () => { add('No, I need more help', 'u'); fails++; reply('Sorry that did not solve it. A support agent can look at your account directly.', escalateChips); } }
-    ]);
-  }
-  function reply(text, after) {
-    const t = add('Typing…', 'b typing');
-    setTimeout(() => { t.className = 'm b'; t.textContent = text; scroll(); if (after) after(); }, 550);
-  }
-  function answer(topic, txt) {
-    const k = KB[topic]; lastTopic = topic;
-    let a = k.d;
-    for (const [w, r] of k.s) { if (has(txt, w)) { a = r; break; } }
-    reply(a, followUp);
+    scrollDown(agentLog);
   }
 
-  function bot(raw) {
-    const txt = raw.toLowerCase();
-    if (has(txt, ESC_WORDS)) { reply('Understood. I will connect you with a support agent.', escalateChips); return; }
-    let best = null, score = 0;
-    for (const k in KB) { const n = KB[k].words.filter(w => txt.includes(w)).length; if (n > score) { best = k; score = n; } }
-    if (best) { fails = 0; answer(best, txt); return; }
-    if (lastTopic && KB[lastTopic].s.some(([w]) => has(txt, w))) { answer(lastTopic, txt); return; }
-    if (has(txt, THANKS)) { reply('You are welcome. Let us know if you need anything else.', topicChips); return; }
-    if (GREET.some(g => txt === g || txt.startsWith(g + ' '))) { reply('Hello. Pick a topic below or describe your problem.', topicChips); return; }
-    fails++;
-    if (fails >= 2) reply("I could not work this out. Let's get you to a person who can help.", escalateChips);
-    else reply('I did not catch that. Which of these is your problem about?', topicChips);
+  async function sendAgent(text) {
+    const u = FA.currentUser;
+    if (!u) { toast('Please sign in again to chat with an agent.'); return; }
+    const ref = FD.collection('supportChats').doc(u.uid);
+    const batch = FD.batch();
+    batch.set(ref, {
+      uid: u.uid, name: who.name || (u.email || '').split('@')[0] || 'User', email: u.email || '',
+      topic: state.topic ? state.topic.label : 'General', lastMessage: text, lastFrom: 'user',
+      lastAt: TS(), unread: true, status: 'open'
+    }, { merge: true });
+    batch.set(ref.collection('messages').doc(), { from: 'user', text: text, createdAt: TS() });
+    try { await batch.commit(); }
+    catch (e) { console.error('Agent message failed', e); toast('Your message could not be sent. Check your connection and try again.'); }
   }
 
-  /* ---------- Live agent (messages are saved to Firestore: supportChats/{uid}/messages) ---------- */
-  function setMode(a) {
-    agent = a;
-    $('#cTitle').textContent = a ? 'Support agent' : 'Vaultex Assistant';
-    $('#cSub').textContent = a ? 'Agent replies appear here' : 'Replies instantly';
-    $('#cDot').className = 'dot' + (a ? ' ag' : '');
-    $('.chat-av').textContent = a ? 'HQ' : 'AI';
-    $('#toAgent').hidden = a; $('#toAI').hidden = !a;
-    $('#cIn').placeholder = a ? 'Write to our agent' : 'Describe your problem';
+  function listenAgent(uid) {
+    FD.collection('supportChats').doc(uid).collection('messages').orderBy('createdAt', 'asc').onSnapshot(s => {
+      const rows = s.docs.map(d => d.data());
+      const last = rows[rows.length - 1];
+      if (!agentFirst && rows.length > agentMsgs.length && last && last.from === 'admin' && state.mode !== 'agent') {
+        $('#agentDot').hidden = false; toast('New reply from a Vaultex agent');
+      }
+      agentFirst = false; agentMsgs = rows;
+      if (state.mode === 'agent') renderAgent();
+    }, err => console.error('Agent chat listener failed', err));
   }
-  function startAgent() {
-    if (agent) return;
-    setMode(true);
-    add('You are now in agent chat', 's');
-    try {
-      const u = firebase.auth().currentUser; if (!u) throw new Error('no user');
-      const db = firebase.firestore(), TS = firebase.firestore.FieldValue.serverTimestamp;
-      chatRef = db.collection('supportChats').doc(u.uid);
-      chatRef.set({ uid: u.uid, name: who.name, email: who.email, status: 'open', updatedAt: TS() }, { merge: true });
-      if (unsub) unsub();
-      unsub = chatRef.collection('messages').orderBy('createdAt').onSnapshot(s => {
-        s.docChanges().forEach(c => { if (c.type === 'added') { const d = c.doc.data(); if (d.from === 'agent') add(d.text, 'a'); } });
-      }, () => {});
-      add('Hi, an agent will join shortly. Describe your problem and include any reference number.', 'a');
-    } catch (e) {
-      chatRef = null;
-      add('Agent chat is not available right now. Please send us an email and we will reply as soon as possible.', 'b');
-      escalateChips();
-    }
-  }
-  $('#toAgent').addEventListener('click', startAgent);
-  $('#toAI').addEventListener('click', () => { setMode(false); fails = 0; add('Back with the assistant', 's'); reply('How can I help?', topicChips); });
 
-  $('#cForm').addEventListener('submit', e => {
+  $('#chatForm').addEventListener('submit', e => {
     e.preventDefault();
-    const v = $('#cIn').value.trim(); if (!v) return;
-    $('#cIn').value = '';
-    add(v, 'u');
-    if (agent) {
-      if (chatRef) {
-        const TS = firebase.firestore.FieldValue.serverTimestamp;
-        chatRef.collection('messages').add({ from: 'user', text: v, createdAt: TS() }).catch(() => toast('Message not sent. Please try again.'));
-        chatRef.set({ lastMessage: v, status: 'open', updatedAt: TS() }, { merge: true }).catch(() => {});
-      } else { add('Agent chat is unavailable. Please use the email icon above.', 'b'); }
-    } else bot(v);
+    const inp = $('#chatInput'), text = inp.value.trim();
+    if (!text) return;
+    inp.value = '';
+    if (state.mode === 'agent') sendAgent(text); else userSays(text);
   });
 
-  setMode(false);
-  add("Hi, I'm the Vaultex assistant. I can help with withdrawals, deposits, transfers and loans. What do you need help with?", 'b');
-  topicChips();
+  /* ================= start ================= */
+  (async function welcome() {
+    await typing(500);
+    addMsg('bot', { text: "Hi! I'm the Vaultex Assistant. I can solve most withdrawal, deposit, transfer and loan problems right away. Pick a topic or describe your problem. If I can't fix it, I'll connect you with an agent." });
+    setChips(topicChips());
+  })();
 
-  try {
-    const A = (typeof auth !== 'undefined' && auth) || firebase.auth();
-    A.onAuthStateChanged(u => { if (u) who = { name: u.displayName || '', email: u.email || '' }; });
-  } catch (e) { /* the page still works without account details */ }
+  FA.onAuthStateChanged(u => {
+    if (!u) return;
+    who = { uid: u.uid, name: u.displayName || '', email: u.email || '' };
+    listenAgent(u.uid);
+  });
 })();
 </script>
 </body>
