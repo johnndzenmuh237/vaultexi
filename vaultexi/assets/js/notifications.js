@@ -64,10 +64,9 @@
   function init() {
     ensureBadges();
     render([]);
-    if (!window.VaultexDemo || !window.auth) return;
+    if (!window.VaultexDemo) return;
 
-    auth.onAuthStateChanged(user => {
-      if (!user) return;
+    VaultexDemo.whenUser(user => {
       let items = [];
       const lastRead = () => Number(localStorage.getItem(readKey(user.uid)) || 0);
       const draw = () => render(items.slice(0, 30).map(t => toNotif(t, lastRead())));
