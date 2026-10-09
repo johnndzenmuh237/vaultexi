@@ -104,7 +104,14 @@
   window.VaultexBalances = { load, onChange, normalizeCoin, logoUrl };
 
   window.addEventListener('load', () => {
-    if (window.VaultexDemo) VaultexDemo.whenUser(() => load({ force: true }));
+    let tries = 0;
+    const t = setInterval(() => {
+      if (window.VaultexDemo) { clearInterval(t); VaultexDemo.whenUser(() => load({ force: true })); }
+      else if (++tries > 50) {
+        clearInterval(t);
+        console.error('VaultexBalances: demo-ledger.js did not load. Add <script src="../assets/js/demo-ledger.js"></script> before coin-balances.js on this page.');
+      }
+    }, 100);
   });
   window.addEventListener('vaultex:deposit-finished', () => load({ force: true }));
   document.addEventListener('visibilitychange', () => { if (!document.hidden && window.VaultexDemo) load({ force: true }); });
