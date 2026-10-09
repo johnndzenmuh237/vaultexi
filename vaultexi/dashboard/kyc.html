@@ -314,7 +314,7 @@
       photos.id = ''; photos.self = '';
     } catch (ex) {
       console.error(ex);
-      errEl.className = 'hint no'; errEl.textContent = 'We could not send your request. Check your connection and try again.';
+      errEl.className = 'hint no'; errEl.textContent = ex && ex.code === 'permission-denied' ? 'Permission denied. The Firestore rules for kycRequests are not published yet. Publish them, then try again.' : 'We could not send your request (' + ((ex && ex.code) || 'error') + '). Check your connection and try again.';
     } finally { btn.disabled = false; btn.textContent = 'Submit for verification'; }
   });
 
@@ -356,7 +356,17 @@
     }
   }
 
-  let first = true, prev = null;
+  let first = true, prev = null, loaded = false;
+
+  // If the status cannot be read (rules not published, slow network, no session yet),
+  // still let the user fill in the form instead of leaving them on a blank page.
+  function showFormAnyway(title, text) {
+    if (loaded) return;
+    $('#statCard').className = 'lx-card stat none';
+    $('#stBadge').textContent = '○'; $('#stTitle').textContent = title; $('#stText').textContent = text;
+    $('#tl').hidden = true; $('#submitted').hidden = true; $('#formArea').hidden = false;
+  }
+  setTimeout(() => showFormAnyway('Request verification', 'We could not check your current status yet. You can fill in the form below.'), 6000);
   function listen(uid) {
     FD.collection('kycRequests').doc(uid).onSnapshot(d => {
       const k = d.exists ? d.data() : null;
@@ -365,8 +375,12 @@
         else toast('Verification rejected', k.adminMessage || 'Open this page to see why.', true);
       }
       prev = k ? k.status : null; first = false;
+      loaded = true;
       render(k);
-    }, err => { console.error('KYC listener failed', err); $('#stTitle').textContent = 'Could not load your status'; $('#stText').textContent = 'Refresh the page to try again.'; });
+    }, err => {
+      console.error('KYC listener failed', err);
+      showFormAnyway('Could not check your status', 'Error: ' + (err && err.code ? err.code : 'unknown') + (err && err.code === 'permission-denied' ? '. The Firestore rules for kycRequests are not published yet.' : '.') + ' You can still fill in the form below.');
+    });
   }
   FA.onAuthStateChanged(u => { if (u) { if (!F.name.value && u.displayName) F.name.value = u.displayName; listen(u.uid); } });
 })();
