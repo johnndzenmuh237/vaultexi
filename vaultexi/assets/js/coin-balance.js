@@ -9,6 +9,7 @@
    ========================================================= */
 (function () {
   'use strict';
+  console.log('[coin-balances] demo-wallet version 6 loaded');
 
   if (!window.VaultexDemo) {
     const src = (document.currentScript && document.currentScript.src) || '';
@@ -83,6 +84,7 @@
     }).sort((a, b) => b.value - a.value);
 
     const totalUsd = coins.reduce((s, c) => s + c.value, 0);
+    console.log('[coin-balances] built', coins.length, 'coin(s), total $' + totalUsd.toFixed(2), 'for', user && user.uid);
     const lastCoin = lastCoinFromTx || (coins[0] && coins[0].base) || localStorage.getItem(LS_LAST) || null;
     if (lastCoin) { try { localStorage.setItem(LS_LAST, lastCoin); } catch (e) {} }
     return { coins, totalUsd, lastCoin };
