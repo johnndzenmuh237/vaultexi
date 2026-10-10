@@ -260,8 +260,55 @@
     return read(TKEY(uid), []).find(t => t.id === id) || null;
   }
 
+
+  /* ---------- trading (swap inside the wallet, no fee) ---------- */
+  const RKEY = uid => 'vaultex_demo_trades_' + uid;
+  const QUOTE = 'USDT';
+  /** side 'buy': spend `usd` of USDT, receive base. side 'sell': sell `usd` worth of base, receive USDT. */
+  async function trade(uid, base, side, usd) {
+    base = String(base || '').toUpperCase();
+    if (!base || base === QUOTE) throw new Error('Pick a coin other than USDT to trade.');
+    if (side !== 'buy' && side !== 'sell') throw new Error('Invalid side.');
+    usd = Math.round(Number(usd) * 100) / 100;
+    if (!(usd >= 1)) throw new Error('Minimum trade is $1.00.');
+    const price = await getPrice(base);
+    const qty = floor8(usd / price);
+    if (!(qty > 0)) throw new Error('Amount is too small.');
+    const w = read(WKEY(uid), { coins: {}, daily: null });
+    w.coins = w.coins || {};
+    const haveQ = Number(w.coins[QUOTE]) || 0, haveB = Number(w.coins[base]) || 0;
+    if (side === 'buy') {
+      if (usd > haveQ + 1e-6) throw new Error('Insufficient USDT. You have ' + fmtUSD(haveQ) + '. Deposit USDT or sell another coin first.');
+      w.coins[QUOTE] = Math.max(0, floor8(haveQ - usd));
+      w.coins[base] = floor8(haveB + qty);
+    } else {
+      if (qty > haveB + 1e-9) throw new Error('Insufficient ' + base + '. You have ' + fmtQty(haveB) + ' ' + base + ' (' + fmtUSD(haveB * price) + ').');
+      w.coins[base] = Math.max(0, floor8(haveB - qty));
+      w.coins[QUOTE] = floor8(haveQ + usd);
+    }
+    const t = { id: makeId(), side, base, qty, usd, price, pair: base + '/' + QUOTE, status: 'Filled', createdAtMs: Date.now() };
+    write(WKEY(uid), w);
+    const list = read(RKEY(uid), []); list.unshift(t); write(RKEY(uid), list.slice(0, 200));
+    emit('wallet', uid);
+    return t;
+  }
+  function getTrades(uid) { return read(RKEY(uid), []); }
+
+
+  /* ---------- direct wallet access (used by the Trading Center) ---------- */
+  function getCoins(uid) { return Object.assign({}, (read(WKEY(uid), { coins: {} }).coins) || {}); }
+  /** Replace the whole coin map, e.g. {USDT:120.5, BTC:0.01}. Zero/empty entries are dropped. */
+  function setCoins(uid, map) {
+    const w = read(WKEY(uid), { coins: {}, daily: null });
+    const out = {};
+    Object.keys(map || {}).forEach(b => { const q = floor8(Number(map[b]) || 0); if (q > 0) out[b] = q; });
+    w.coins = out;
+    write(WKEY(uid), w);
+    emit('wallet', uid);
+  }
+
   window.VaultexDemo = {
-    COINS, DAILY_LIMIT, getPrice, walletAddress, deposit, withdraw,
+    COINS, DAILY_LIMIT, getPrice, walletAddress, deposit, withdraw, trade, getTrades, getCoins, setCoins,
     onWallet, onTransactions, getTransaction, fmtQty, fmtUSD, esc, floor8,
     getAuth, currentUser, whenUser, debug,
     receiptUrl: id => 'tx-receipt.html?id=' + encodeURIComponent(id),
