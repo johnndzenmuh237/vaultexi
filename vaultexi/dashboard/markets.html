@@ -1125,6 +1125,7 @@ text-align:left;
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="../assets/js/firebase-init.js"></script>
+<script src="../assets/js/demo-ledger.js"></script>
 <script src="../assets/js/auth-guard.js"></script>
 <script src="../assets/js/coin-balances.js"></script>
 <script src="../assets/js/dashboard.js"></script>
@@ -1213,6 +1214,7 @@ text-align:left;
   const setHistory = h => localStorage.setItem(LS_HIST, JSON.stringify(h.slice(0, 100)));
 
   async function syncBalanceWithDeposits(uid) {
+    if (window.VaultexDemo) return; // demo wallet (trading-wallet.js) is the balance source
     if (!uid || !window.auth || !auth.currentUser) return;
     try {
       const token = await auth.currentUser.getIdToken();
@@ -1524,6 +1526,7 @@ text-align:left;
       const vols = klines.map(toVolumeBar);
       candleSeries.setData(candles);
       volumeSeries.setData(vols);
+      if (window.__vxOnCandles) { try { window.__vxOnCandles(klines, res.url); } catch (e) { console.error(e); } }
       chart.timeScale().fitContent();
       resizeChart();
     } catch (err) {
@@ -1542,6 +1545,7 @@ text-align:left;
       const lastVol = toVolumeBar(klines[klines.length - 1]);
       candleSeries.update(last);
       volumeSeries.update(lastVol);
+      if (window.__vxOnTick) { try { window.__vxOnTick(klines[klines.length - 1], res.url); } catch (e) { console.error(e); } }
     } catch (e) { /* silent — next poll will retry */ }
   }
 
@@ -2254,10 +2258,24 @@ text-align:left;
   if (window.auth) {
     auth.onAuthStateChanged(user => { if (user) syncBalanceWithDeposits(user.uid); });
   }
+
+  /* hooks used by trading-wallet.js and trading-indicators.js */
+  window.__vxTerminal = {
+    rerender() { renderBalance(); renderHoldings(); renderHistory(); updateSelectedAssetHeader(); },
+    selectSymbol,
+    getSymbol: () => selectedSymbol,
+    getInterval: () => currentInterval,
+    getPrice: base => { const t = TICKER_MAP.get(base + 'USDT'); return t ? t.price : null; },
+    hasTicker: sym => TICKER_MAP.has(sym),
+    getChart: () => (chart ? { chart, candleSeries, volumeSeries } : null),
+    reloadCandles: () => loadCandles(),
+  };
 })();
 </script>
 
 <!-- Deposited-coin add-on: pins deposited coins in the market list, shows balances, opens the market on the deposited coin -->
-<script src="../assets/js/trading-deposits.js"></script>
+<script src="../assets/js/trading-wallet.js"></script>
+<!-- Technical analysis: indicators + drawing tools -->
+<script src="../assets/js/trading-indicators.js"></script>
 </body>
 </html>
