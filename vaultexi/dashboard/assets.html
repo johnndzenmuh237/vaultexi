@@ -422,6 +422,7 @@
       });
       rows.sort((a, b) => b.quoteVolume - a.quoteVolume);
       ALL_ROWS = rows;
+      window.__vxMarket = rows;
       renderAssets();
     } catch (err) {
       console.error('Vaultex assets: failed to load market list', err);
@@ -503,6 +504,7 @@
   const fmtUSD = n => '$' + (n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
   const fmtQty = n => (n||0).toLocaleString('en-US',{maximumFractionDigits:8});
   const fmtPct = n => `${n>0?'+':''}${(n||0).toFixed(2)}%`;
+  const logo = b => `https://assets.coincap.io/assets/icons/${String(b).toLowerCase()}@2x.png`;
 
   function renderHoldings({ coins, totalUsd }) {
     coins = coins || [];
@@ -528,7 +530,7 @@
     const chips = document.querySelector('[data-assets-chips]');
     if (chips) chips.innerHTML = sorted.length ? sorted.map((c, i) => `
       <div class="at-chip">
-        <img src="${VaultexBalances.logoUrl(c.base)}" alt="" onerror="this.style.visibility='hidden'">
+        <img src="${logo(c.base)}" alt="" onerror="this.style.visibility='hidden'">
         <div><b><span class="dot" style="background:${PAL[i % PAL.length]};display:inline-block;margin-right:6px;"></span>${c.base}</b>
         <small>${fmtQty(c.qty)} · ${fmtUSD(c.value)}${totalUsd > 0 ? ' · ' + ((c.value / totalUsd) * 100).toFixed(1) + '%' : ''}</small></div>
       </div>`).join('') : '';
@@ -539,7 +541,7 @@
     body.innerHTML = coins.map(c => `
       <tr>
         <td><div class="holding-cell">
-          <img src="${VaultexBalances.logoUrl(c.base)}" alt="" onerror="this.style.visibility='hidden'">
+          <img src="${logo(c.base)}" alt="" onerror="this.style.visibility='hidden'">
           <div><div class="holding-name" style="font-weight:600;">${c.base}</div>
           <div class="asset-sym">${c.base === 'USDT' ? 'Tether' : c.base + '/USDT'}</div></div></div></td>
         <td class="mono">${fmtQty(c.qty)}</td>
@@ -552,7 +554,41 @@
         </td>
       </tr>`).join('');
   }
-  VaultexBalances.onChange(renderHoldings);
+
+  /* Balances come straight from the demo wallet (the same source the Dashboard uses). */
+  const setSub = t => { const el = document.querySelector('[data-assets-sub]'); if (el) el.textContent = t; };
+  function fromWallet(w) {
+    const locked = (window.VaultexLocked && window.VaultexLocked()) || {};   // coins moved to the security balance
+    const live = {};
+    (window.__vxMarket || []).forEach(r => { live[r.base] = r; });
+    let total = 0;
+    const coins = (w.coins || []).map(c => {
+      const base = String(c.base).toUpperCase();
+      const qty = Math.max(0, (Number(c.qty) || 0) - (Number(locked[base]) || 0));
+      const price = Number(c.price) || (base === 'USDT' ? 1 : Number((live[base] || {}).price)) || 0;   // fall back to the market list price
+      total += qty * price;
+      return { base, symbol: base + 'USDT', qty, price, pct: base === 'USDT' ? 0 : ((live[base] || {}).pct || 0), value: qty * price };
+    }).filter(c => c.qty > 1e-12).sort((a, b) => b.value - a.value);
+    renderHoldings({ coins, totalUsd: total });
+  }
+  let offWallet = null;
+  function watchWallet(u) {
+    if (offWallet) offWallet();
+    offWallet = VaultexDemo.onWallet(u.uid, fromWallet);
+  }
+  (function boot() {
+    let tries = 0;
+    const t = setInterval(() => {
+      if (window.VaultexDemo && VaultexDemo.whenUser) {
+        clearInterval(t);
+        VaultexDemo.whenUser(u => { watchWallet(u); setInterval(() => watchWallet(u), 30000); });
+        setTimeout(() => { if (!window.__vxHeld) setSub('Could not read your wallet — sign in again and refresh.'); }, 12000);
+      } else if (++tries > 60) {
+        clearInterval(t);
+        setSub('demo-ledger.js is not loaded on this page — add it after firebase-init.js.');
+      }
+    }, 100);
+  })();
 })();
 
 /**
