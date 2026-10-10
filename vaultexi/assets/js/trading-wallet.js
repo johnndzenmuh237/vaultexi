@@ -171,29 +171,37 @@
       const st = document.createElement('style');
       st.textContent = `
         .trading-header .balance-chip{display:none;}
-        .vx-wallet{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:12px 16px;margin-bottom:14px;}
-        .vx-wallet .vw-total{padding-right:18px;border-right:1px solid var(--line);}
-        .vx-wallet .vw-k{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;}
-        .vx-wallet .vw-v{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.5rem;line-height:1.1;}
-        .vx-wallet .vw-coins{display:flex;flex-wrap:wrap;gap:8px;flex:1;min-width:0;}
-        .vw-coin{display:flex;align-items:center;gap:8px;padding:6px 11px;border:1px solid var(--line);border-radius:10px;background:transparent;color:inherit;cursor:pointer;font:inherit;text-align:left;}
-        .vw-coin:hover,.vw-coin.active{border-color:var(--accent,#6C7CFF);background:var(--ink-soft);}
-        .vw-coin.cash{cursor:default;}.vw-coin.cash:hover{border-color:var(--line);background:transparent;}
-        .vw-coin b{font-size:.82rem;display:block;}
-        .vw-coin small{display:block;color:var(--muted);font-size:.68rem;font-family:'JetBrains Mono',monospace;}
+        /* same look as the Assets page "Total balance" card */
+        .vx-wallet{padding:20px 22px;margin-bottom:16px;}
+        .vx-wallet .at-top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;}
+        .vx-wallet .at-k{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+        .vx-wallet .at-v{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:2.1rem;line-height:1.1;}
+        .vx-wallet .at-sub{font-size:.82rem;color:var(--muted);text-align:right;}
+        .vx-wallet .at-bar{display:flex;height:8px;border-radius:6px;overflow:hidden;margin:16px 0 12px;background:var(--ink-soft);}
+        .vx-wallet .at-bar i{display:block;height:100%;}
+        .vx-wallet .at-chips{display:flex;flex-wrap:wrap;gap:10px;}
+        .at-chip{display:flex;align-items:center;gap:10px;padding:9px 14px;border:1px solid var(--line);border-radius:12px;background:var(--ink-soft);color:inherit;font:inherit;text-align:left;cursor:pointer;}
+        .at-chip:hover,.at-chip.active{border-color:var(--accent,#6C7CFF);}
+        .at-chip.cash{cursor:default;}.at-chip.cash:hover{border-color:var(--line);}
+        .at-chip img{width:28px;height:28px;border-radius:50%;background:#fff;padding:2px;box-sizing:border-box;object-fit:contain;flex-shrink:0;}
+        .at-chip b{display:block;font-size:.86rem;}
+        .at-chip small{display:block;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);}
+        .at-chip .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
         .vw-empty{color:var(--muted);font-size:.84rem;}
         .market-row.vx-owned{box-shadow:inset 3px 0 0 var(--accent,#6C7CFF);}
         .market-row .vx-owned-badge{display:block;font-size:.62rem;color:var(--accent,#6C7CFF);font-family:'JetBrains Mono',monospace;margin-top:2px;}
-        /* full-screen copy of the bar */
+        /* full-screen copy: compact, one line */
         .fs-balances{display:none !important;}
         #vx-fs-wallet{display:none;}
         .terminal-fullscreen-root.is-fullscreen #vx-fs-wallet{display:flex;align-items:center;gap:12px;margin-left:auto;min-width:0;overflow-x:auto;}
-        #vx-fs-wallet .vw-total{padding-right:12px;border-right:1px solid var(--line);white-space:nowrap;}
-        #vx-fs-wallet .vw-v{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.05rem;}
-        #vx-fs-wallet .vw-k{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
-        #vx-fs-wallet .vw-coins{display:flex;gap:6px;}
-        #vx-fs-wallet .vw-coin{padding:4px 9px;white-space:nowrap;}
-        @media (max-width:640px){.vx-wallet{gap:10px;padding:10px 12px;}.vx-wallet .vw-v{font-size:1.2rem;}.vx-wallet .vw-total{border-right:0;padding-right:0;width:100%;}}
+        #vx-fs-wallet .at-top{display:block;white-space:nowrap;padding-right:12px;border-right:1px solid var(--line);}
+        #vx-fs-wallet .at-v{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.05rem;}
+        #vx-fs-wallet .at-k{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:0;}
+        #vx-fs-wallet .at-sub,#vx-fs-wallet .at-bar{display:none;}
+        #vx-fs-wallet .at-chips{display:flex;flex-wrap:nowrap;gap:6px;}
+        #vx-fs-wallet .at-chip{padding:4px 10px;white-space:nowrap;gap:8px;}
+        #vx-fs-wallet .at-chip img{width:20px;height:20px;}
+        @media (max-width:640px){.vx-wallet{padding:14px;}.vx-wallet .at-v{font-size:1.6rem;}.vx-wallet .at-sub{text-align:left;}}
       `;
       document.head.appendChild(st);
     }
@@ -217,12 +225,28 @@
     }).filter(x => x.qty > 1e-9).sort((a, b) => b.value - a.value);
   }
 
+  const PAL = ['#6C7CFF', '#16c784', '#f7a600', '#ea3943', '#00bcd4', '#e91e63', '#9c27b0', '#8bc34a'];
+  const logo = b => `https://assets.coincap.io/assets/icons/${String(b).toLowerCase()}@2x.png`;
+
   function walletHTML(cash, hs, sel) {
-    const total = cash + hs.reduce((s, x) => s + x.value, 0);
-    const chips = (cash > 0.005 || !hs.length ? `<div class="vw-coin cash"><div><b>USDT</b><small>${fmtQty(cash)}</small></div></div>` : '') +
-      hs.map(x => `<button class="vw-coin ${x.sym === sel ? 'active' : ''}" data-vw-pick="${x.sym}" title="Trade ${x.base}/USDT"><div><b>${x.base}</b><small>${fmtQty(x.qty)} · ${fmtUSD(x.value)}</small></div></button>`).join('') +
-      (!hs.length ? `<span class="vw-empty">No coins yet — <a href="deposits.html">deposit</a> one to trade it here.</span>` : '');
-    return `<div class="vw-total"><div class="vw-k">Total balance</div><div class="vw-v">${fmtUSD(total)}</div></div><div class="vw-coins">${chips}</div>`;
+    // every asset incl. USDT, biggest first
+    const items = hs.map(x => ({ base: x.base, sym: x.sym, qty: x.qty, value: x.value }));
+    if (cash > 0.005) items.push({ base: 'USDT', sym: null, qty: cash, value: cash });
+    items.sort((a, b) => b.value - a.value);
+    const total = items.reduce((s, x) => s + x.value, 0);
+    const bar = total > 0 ? items.map((x, i) => `<i style="width:${Math.max(0.5, x.value / total * 100).toFixed(2)}%;background:${PAL[i % PAL.length]}" title="${x.base}"></i>`).join('') : '';
+    const chips = items.map((x, i) => {
+      const inner = `<img src="${logo(x.base)}" data-coin-base="${x.base}" alt="">
+        <div><b><span class="dot" style="background:${PAL[i % PAL.length]}"></span>${x.base}</b>
+        <small>${fmtQty(x.qty)} · ${fmtUSD(x.value)}${total > 0 ? ' · ' + (x.value / total * 100).toFixed(1) + '%' : ''}</small></div>`;
+      return x.sym
+        ? `<button class="at-chip ${x.sym === sel ? 'active' : ''}" data-vw-pick="${x.sym}" title="Trade ${x.base}/USDT">${inner}</button>`
+        : `<div class="at-chip cash" title="USDT is your buying balance">${inner}</div>`;
+    }).join('');
+    const sub = items.length ? items.length + (items.length === 1 ? ' asset' : ' assets') + ' held · live market prices' : 'No assets yet — deposit a coin to get started';
+    return `<div class="at-top"><div><div class="at-k">Total balance</div><div class="at-v">${fmtUSD(total)}</div></div><div class="at-sub">${sub}</div></div>
+      <div class="at-bar">${bar}</div>
+      <div class="at-chips">${chips || '<span class="vw-empty">No coins yet — <a href="deposits.html">deposit</a> one to trade it here.</span>'}</div>`;
   }
 
   function renderPanel() {
