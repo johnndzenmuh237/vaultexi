@@ -136,9 +136,12 @@
       </div>
     </div>
 
+    <!-- BALANCE: same card as the Assets page -->
+    <div id="walletCard" style="margin-bottom:22px;"></div>
+
     <!-- BALANCE STRIP -->
     <div class="widget bal-strip">
-      <div>
+      <div style="display:none">
         <div class="lbl">Available balance (works with the bot)</div>
         <div class="val" id="availBalVal">$0.00</div>
         <div id="availSub" style="font-size:.8rem;color:var(--muted);margin-top:4px;"></div>
@@ -175,6 +178,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="../assets/js/firebase-init.js"></script>
 <script src="../assets/js/demo-ledger.js"></script>
+<script src="../assets/js/wallet-card.js"></script>
 <script src="../assets/js/auth-guard.js"></script>
 <script src="../assets/js/dashboard.js"></script>
 <script src="../assets/js/notifications.js"></script>
@@ -197,6 +201,7 @@
   const V = window.VaultexDemo;
   let UID = null;
   let READY = false;
+  let CARD = null;
   let W = { coins: [], total: 0 };     // [{base, qty, price}] + total USD
 
   function recalcTotal() { W.total = W.coins.reduce((s, c) => s + c.qty * c.price, 0); }
@@ -322,6 +327,7 @@
     el.classList.toggle('zero', bal <= 0);
     $('zeroBalWarn').style.display = (READY && bal <= 0) ? '' : 'none';
     const held = W.coins.filter(c => c.qty * c.price >= 0.01).sort((a, b) => b.qty * b.price - a.qty * a.price).slice(0, 6);
+    if (CARD) CARD.update({ coins: W.coins, sub: READY ? (W.coins.length ? 'Available to the bot · live market prices' : 'No assets yet — deposit a coin to get started') : 'Loading your wallet…' });
     $('availSub').textContent = !READY ? 'Loading your wallet…' : (held.length
       ? 'Wallet: ' + held.map(c => c.base + ' ' + (c.base === 'USDT' ? fmtMoney(c.qty).slice(1) : c.qty.toLocaleString('en-US', { maximumFractionDigits: 6 }))).join(' · ')
       : '');
@@ -519,6 +525,7 @@
     if (!document.hidden) { reconcile(); renderAll(); }
   });
 
+  if (window.VaultexWalletCard) CARD = VaultexWalletCard.mount($('walletCard'));
   // Wait for sign-in, then follow the wallet live (deposits, trades, staking all update it).
   if (V) {
     V.whenUser(user => {
