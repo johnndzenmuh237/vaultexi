@@ -220,7 +220,8 @@ img{display:block;max-width:100%}
 
 <div class="wallet-strip">
   <div class="container">
-    <div class="w-stat" id="usdtBalStat" style="display:none;"><span class="lbl">USDT balance</span><span class="val" id="usdtBal">$0.00</span></div>
+    <div class="w-stat" id="totalBalStat"><span class="lbl">Total balance</span><span class="val" id="totalBalVal">$0.00</span></div>
+    <div class="w-stat" id="usdtBalStat"><span class="lbl">Available USDT</span><span class="val" id="usdtBal">$0.00</span></div>
     <div class="w-stat"><span class="lbl">Total staked (est.)</span><span class="val" id="totalStakedVal">$0.00</span></div>
     <div class="w-stat"><span class="lbl">Unclaimed rewards (est.)</span><span class="val" id="totalRewardVal" style="color:var(--mint)">$0.00</span></div>
     <div class="w-stat"><span class="lbl">Est. weekly profit</span><span class="val" id="totalWeeklyVal" style="color:var(--mint)">$0.00</span></div>
@@ -356,6 +357,7 @@ img{display:block;max-width:100%}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="../assets/js/firebase-init.js"></script>
+<script src="../assets/js/demo-ledger.js"></script>
 
 <script>
 (function(){
@@ -365,101 +367,37 @@ img{display:block;max-width:100%}
   const fmtAmt = n => (n||0).toLocaleString('en-US',{minimumFractionDigits:4,maximumFractionDigits:6});
 
   /* =========================================================
-     LOCAL WALLET — isolated on purpose.
-     These keys are prefixed "vaultex_staking_staking_" and are
-     entirely separate from:
-       - the real custody balance served by /api/account/summary
-         (used on dashboard.html — real funds, admin-gated
-         withdrawals), and
-       - any production wallet keys.
-     This page never reads or writes anything to the real
-     account balance or Firestore trade/withdrawal data. Every
-     figure here is simulated and clearly separated in the
-     UI. The only thing read from the real account is the
-     totalBalance figure, used purely to size the local USDT
-     balance below — see syncLocalBalanceWithDeposits().
+     WALLET — the same simulated wallet used by Deposits, Assets,
+     Trading and the AutoTrading bot (VaultexDemo, demo-ledger.js).
+     Coins you deposit or buy on the Trading page show up here as
+     "available". Staking moves coins out of the wallet into a
+     position; unstaking returns the coins plus the reward.
   ========================================================= */
-  const LS_BAL   = 'vaultex_staking_staking_balance_usdt';
-  const LS_HOLD  = 'vaultex_staking_staking_holdings';
-  const LS_STAKES= 'vaultex_staking_staking_positions';
-  const LS_HIST  = 'vaultex_staking_staking_history';
+  const LS_STAKES= 'vaultex_demo_staking_positions';
+  const LS_HIST  = 'vaultex_demo_staking_history';
+  const V = window.VaultexDemo;
+  let UID = null;
+  let WALLET_TOTAL = 0;          // free wallet value in USD (from the ledger)
 
-  function getBalance(){ return parseFloat(localStorage.getItem(LS_BAL)||'0'); }
-  function setBalance(v){ localStorage.setItem(LS_BAL, String(Math.max(0,v))); }
-  function getHoldings(){ try{ return JSON.parse(localStorage.getItem(LS_HOLD)||'{}'); }catch(e){ return {}; } }
-  function setHoldings(h){ localStorage.setItem(LS_HOLD, JSON.stringify(h)); }
+  /* free coins in the wallet, keyed by lower-case symbol (btc, eth, usdt ...) */
+  function getHoldings(){
+    const out = {};
+    if(!V || !UID) return out;
+    const raw = V.getCoins(UID);
+    Object.keys(raw).forEach(b=>{ out[b.toLowerCase()] = Number(raw[b])||0; });
+    return out;
+  }
+  function getBalance(){ return (getHoldings().usdt)||0; }
+  function adjustWallet(symbol, delta){
+    const base = symbol.toUpperCase();
+    const map = V.getCoins(UID);
+    map[base] = Math.max(0, (Number(map[base])||0) + delta);
+    V.setCoins(UID, map);
+  }
   function getStakes(){ try{ return JSON.parse(localStorage.getItem(LS_STAKES)||'[]'); }catch(e){ return []; } }
   function setStakes(s){ localStorage.setItem(LS_STAKES, JSON.stringify(s)); }
   function getHistory(){ try{ return JSON.parse(localStorage.getItem(LS_HIST)||'[]'); }catch(e){ return []; } }
   function setHistory(h){ localStorage.setItem(LS_HIST, JSON.stringify(h)); }
-
-  /* ---------------------------------------------------------
-     ONE-TIME MIGRATION — clear the legacy auto-seeded balance
-     ---------------------------------------------------------
-     An earlier version of this page seeded a flat $10,000 local
-     balance into LS_BAL on first visit (before deposit-syncing
-     existed). That value can still be sitting in a browser's
-     localStorage from that earlier session. Wipe it out once so
-     every user's local balance goes back to being driven purely by
-     syncLocalBalanceWithDeposits() below — never by a hardcoded seed.
-  --------------------------------------------------------- */
-  const LS_MIGRATED_FLAG = 'vaultex_staking_staking_migrated_v2';
-  if(!localStorage.getItem(LS_MIGRATED_FLAG)){
-    localStorage.removeItem(LS_BAL);
-    localStorage.setItem(LS_MIGRATED_FLAG, '1');
-  }
-
-  /* ---------------------------------------------------------
-     SYNC LOCAL USDT BALANCE WITH REAL DEPOSITS
-     ---------------------------------------------------------
-     Same pattern as trade.html's AutoTrading bot: on auth and on
-     tab refocus, check /api/account/summary for the real balance.
-     If it's higher than the last time we checked (a deposit), add
-     that exact delta to the local staking balance. Real
-     balance decreases (withdrawals) are never synced in, since the
-     local balance may already include simulated staking rewards and
-     subtracting a withdrawal from it would produce a meaningless
-     number. This key is namespaced separately from trade.html's
-     tracker so each local pool (staking vs. AutoTrading) receives
-     its own independent top-up off the same real deposit.
-  --------------------------------------------------------- */
-  const LS_REAL_SEEN = uid => `vaultex_staking_staking_real_balance_seen_${uid}`;
-
-  async function syncLocalBalanceWithDeposits(uid){
-    if(!uid || !window.auth || !auth.currentUser) return;
-    try{
-      const token = await auth.currentUser.getIdToken();
-      const res = await fetch('/api/account/summary', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if(!res.ok) return;
-      const data = await res.json();
-      if(!data.success || typeof data.totalBalance !== 'number') return;
-
-      const key = LS_REAL_SEEN(uid);
-      const lastSeenRaw = localStorage.getItem(key);
-      const lastSeen = lastSeenRaw === null ? NaN : parseFloat(lastSeenRaw);
-      const realBal = data.totalBalance;
-
-      if(isNaN(lastSeen)){
-        // First time seeing this user on this device: seed the local
-        // balance from their real balance right now.
-        setBalance(realBal);
-      } else if(realBal > lastSeen){
-        // Real balance grew since last check — a deposit happened.
-        const delta = realBal - lastSeen;
-        setBalance(getBalance() + delta);
-      }
-      // realBal <= lastSeen: local balance left untouched.
-
-      localStorage.setItem(key, realBal.toString());
-    }catch(e){
-      console.error('Failed to sync local staking balance with real deposits', e);
-    }finally{
-      renderHeader();
-      renderAssetRows();
-    }
-  }
 
   /* ===== staking pool + plan definitions (amounts & APY boosted, durations unchanged) ===== */
   const POOLS = [
@@ -502,7 +440,7 @@ img{display:block;max-width:100%}
     throw lastErr;
   }
 
-  const LS_PRICE_CACHE = 'vaultex_staking_staking_price_cache';
+  const LS_PRICE_CACHE = 'vaultex_demo_staking_price_cache';
   async function loadPrices(){
     const ids = POOLS.map(p=>p.id).join(',');
     try{
@@ -537,11 +475,6 @@ img{display:block;max-width:100%}
   function renderHeader(){
     const bal = getBalance();
     $('usdtBal').textContent = fmtUSD(bal);
-    // The local USDT balance is only shown once a real deposit has
-    // synced a nonzero amount in — before that there's nothing to
-    // show, and displaying a static "$0.00" reads like an invented
-    // pre-loaded balance rather than "you haven't funded this yet".
-    $('usdtBalStat').style.display = bal > 0 ? '' : 'none';
     const stakes = getStakes();
     let staked=0, reward=0, weekly=0;
     stakes.forEach(s=>{
@@ -550,6 +483,7 @@ img{display:block;max-width:100%}
       reward += computeReward(s)*p;
       weekly += weeklyReward(s.amount, s.apy)*p;
     });
+    $('totalBalVal').textContent = fmtUSD(WALLET_TOTAL + staked + reward);
     $('totalStakedVal').textContent = fmtUSD(staked);
     $('totalRewardVal').textContent = fmtUSD(reward);
     $('totalWeeklyVal').textContent = fmtUSD(weekly);
@@ -593,16 +527,24 @@ img{display:block;max-width:100%}
      Unchanged behavior, just spends from the (now deposit-synced)
      local USDT balance instead of a manually-topped-up faucet balance.
   */
-  function faucetConvert(symbol){
+  async function faucetConvert(symbol){
     const pool = POOLS.find(p=>p.symbol===symbol); if(!pool) return;
+    if(!UID){ alert('Please wait a moment, your wallet is still loading.'); return; }
     const price = PRICES[symbol];
     if(!price){ alert('Prices are still loading, try again in a moment.'); return; }
-    const usdToSpend = Math.min(getBalance(), 200);
-    if(usdToSpend<=0){ alert('Your USDT balance is $0 — deposit funds to your Vaultex account to get a balance here.'); return; }
-    setBalance(getBalance()-usdToSpend);
-    const holdings = getHoldings();
-    holdings[symbol] = (holdings[symbol]||0) + usdToSpend/price;
-    setHoldings(holdings);
+    const usdt = getBalance();
+    if(usdt < 1){ alert('You have no USDT in your wallet. Deposit funds, or sell a coin on the Trading page to get USDT first.'); return; }
+    const need = pool.min*price*1.05;
+    const usd = Math.floor(Math.min(usdt, Math.max(200, need))*100)/100;
+    try{
+      await V.trade(UID, symbol.toUpperCase(), 'buy', usd);
+    }catch(e){
+      // pair not listed on the price feed: convert at the page price instead
+      try{
+        adjustWallet('usdt', -usd);
+        adjustWallet(symbol, usd/price);
+      }catch(e2){ alert(e2.message||'Could not convert.'); }
+    }
     renderAssetRows(); renderHeader();
   }
 
@@ -652,9 +594,8 @@ img{display:block;max-width:100%}
     const s = stakes[idx];
     if(s.unlockAt && Date.now() < s.unlockAt) return;
     const reward = computeReward(s);
-    const holdings = getHoldings();
-    holdings[s.symbol] = (holdings[s.symbol]||0) + s.amount + reward;
-    setHoldings(holdings);
+    if(!UID) return;
+    adjustWallet(s.symbol, s.amount + reward);
     stakes.splice(idx,1);
     setStakes(stakes);
 
@@ -768,8 +709,8 @@ img{display:block;max-width:100%}
     const avail = holdings[modalSymbol]||0;
     if(amt<=0 || amt>avail || amt<pool.min) return;
 
-    holdings[modalSymbol] = avail - amt;
-    setHoldings(holdings);
+    if(!UID) return;
+    adjustWallet(modalSymbol, -amt);
 
     const stakes = getStakes();
     const now = Date.now();
@@ -806,15 +747,15 @@ img{display:block;max-width:100%}
   setInterval(loadPrices, 60000);
   setInterval(()=>{ renderStakes(); renderHeader(); }, 1000);
 
-  document.addEventListener('visibilitychange', () => {
-    if(!document.hidden && window.auth && auth.currentUser){
-      syncLocalBalanceWithDeposits(auth.currentUser.uid);
-    }
-  });
+  function refreshAll(){ renderAssetRows(); renderHeader(); if(modalSymbol) updateModalSummary(); }
+  window.addEventListener('vaultex:deposit-finished', refreshAll);   // wallet changed (trade, deposit, other tab)
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) refreshAll(); });
 
-  if(window.auth){
-    auth.onAuthStateChanged((user) => {
-      if(user) syncLocalBalanceWithDeposits(user.uid);
+  if(V){
+    V.whenUser(user=>{
+      UID = user.uid;
+      V.onWallet(UID, w=>{ WALLET_TOTAL = w.totalUsd||0; refreshAll(); });
+      refreshAll();
     });
   }
 })();
