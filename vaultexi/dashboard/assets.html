@@ -73,6 +73,23 @@
 
   .assets-empty { text-align: center; color: var(--muted); font-size: .85rem; padding: 32px 8px; }
 
+  /* ===== Total balance + holdings summary ===== */
+  .assets-total { padding: 20px 22px; }
+  .at-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+  .at-k { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .at-v { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 2.1rem; line-height: 1.1; }
+  .at-sub { font-size: .82rem; color: var(--muted); text-align: right; }
+  .at-bar { display: flex; height: 8px; border-radius: 6px; overflow: hidden; margin: 16px 0 12px; background: var(--ink-soft); }
+  .at-bar i { display: block; height: 100%; }
+  .at-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .at-chip { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--ink-soft); }
+  .at-chip img { width: 28px; height: 28px; border-radius: 50%; background: #fff; padding: 2px; box-sizing: border-box; object-fit: contain; }
+  .at-chip b { display: block; font-size: .86rem; }
+  .at-chip small { display: block; font-family: 'JetBrains Mono', monospace; font-size: .72rem; color: var(--muted); }
+  .at-chip .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .asset-held { display: inline-block; margin-top: 2px; font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--accent, #6C7CFF); }
+  @media (max-width: 640px) { .at-v { font-size: 1.6rem; } .at-sub { text-align: left; } }
+
   @media (max-width: 900px) {
     .assets-list-head, .asset-row { grid-template-columns: 2fr 1fr 1fr auto; }
     .assets-list-head span:nth-child(4), .asset-vol { display: none; }
@@ -185,6 +202,16 @@
       <a class="btn btn-ghost btn-sm" href="loan.html#apply">Back to loan application</a>
     </div>
 
+    <!-- Total balance + every coin you hold -->
+    <div class="widget assets-total" style="margin-bottom:24px;">
+      <div class="at-top">
+        <div><div class="at-k">Total balance</div><div class="at-v" data-assets-total>$0.00</div></div>
+        <div class="at-sub" data-assets-sub>Loading your assets…</div>
+      </div>
+      <div class="at-bar" data-assets-bar></div>
+      <div class="at-chips" data-assets-chips></div>
+    </div>
+
     <div class="widget" style="margin-bottom:24px;">
       <div class="widget-head"><h3>Holdings</h3><span class="mono" data-portfolio-total>$0.00</span></div>
       <table class="data-table">
@@ -193,7 +220,7 @@
           <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Loading supported assets…</td></tr>
         </tbody>
       </table>
-      <p style="font-size:.8rem;color:var(--muted);margin-top:12px;">Balances show as 0 until a deposit is confirmed on your account. Prices are live market data; your holdings are not.</p>
+      <p style="font-size:.8rem;color:var(--muted);margin-top:12px;">Your balance is the sum of every coin you hold, valued at the live market price. Deposits add to it, withdrawals and trades update it.</p>
     </div>
 
     <!-- All supported assets — full market list, Binance-style -->
@@ -207,6 +234,7 @@
           <input type="text" class="assets-search" placeholder="Search by name or symbol" data-assets-search>
           <div class="assets-tabs" data-assets-tabs>
             <button class="active" data-tab="All">All</button>
+            <button data-tab="Held">My assets</button>
             <button data-tab="Gainers">Gainers</button>
             <button data-tab="Losers">Losers</button>
           </div>
@@ -408,6 +436,7 @@
     let rows = ALL_ROWS;
     if (currentTab === 'Gainers') rows = rows.filter(r => r.pct > 0).sort((a, b) => b.pct - a.pct);
     else if (currentTab === 'Losers') rows = rows.filter(r => r.pct < 0).sort((a, b) => a.pct - b.pct);
+    else if (currentTab === 'Held') rows = rows.filter(r => (window.__vxHeld || {})[r.base]);
     if (currentQuery) {
       const q = currentQuery.toLowerCase();
       rows = rows.filter(r => r.base.toLowerCase().includes(q) || r.symbol.toLowerCase().includes(q));
@@ -422,27 +451,31 @@
 
     countEl.textContent = `${ALL_ROWS.length} supported assets — live prices from the market`;
 
-    const rows = getFilteredRows();
+    let rows = getFilteredRows();
     if (!rows.length) {
       container.innerHTML = `<div class="assets-empty">No assets match your search.</div>`;
       return;
     }
 
+    const held = window.__vxHeld || {};
+    if (!currentQuery && currentTab === 'All') rows = rows.slice().sort((a, b) => (held[b.base] ? 1 : 0) - (held[a.base] ? 1 : 0));   // your coins first
     container.innerHTML = rows.map(r => {
       const pctClass = r.pct >= 0 ? 'up' : 'down';
+      const h = held[r.base];
       return `<div class="asset-row">
         <div class="asset-name-cell">
           <img class="asset-icon" src="${coinLogoUrl(r.base)}" data-coin-base="${r.base}" alt="" loading="lazy">
           <div class="asset-name-text">
             <div class="asset-name">${r.base}</div>
             <div class="asset-sym">${r.base}/USDT</div>
+            ${h ? `<span class="asset-held">Held: ${(h.qty).toLocaleString('en-US', { maximumFractionDigits: 8 })} · ${fmtPrice(h.value)}</span>` : ''}
           </div>
         </div>
         <div class="asset-price">${fmtPrice(r.price)}</div>
         <div class="asset-pct ${pctClass}">${fmtPct(r.pct)}</div>
         <div class="asset-vol">${fmtCompact(r.quoteVolume)}</div>
         <div class="asset-actions">
-          <a class="btn btn-ghost btn-sm" href="trading.html">Trade</a>
+          <a class="btn ${h ? 'btn-primary' : 'btn-ghost'} btn-sm" href="trading.html?coin=${r.base}">Trade</a>
         </div>
       </div>`;
     }).join('');
@@ -461,6 +494,7 @@
     });
   });
 
+  window.addEventListener('vx-held', renderAssets);   // redraw the "Held" badges when balances change
   loadAssets();
   setInterval(loadAssets, 30000);
 })();
@@ -471,11 +505,33 @@
   const fmtPct = n => `${n>0?'+':''}${(n||0).toFixed(2)}%`;
 
   function renderHoldings({ coins, totalUsd }) {
-    window.__vxCoins = coins || [];
+    coins = coins || [];
+    window.__vxCoins = coins;
     const body = document.querySelector('[data-holdings-table]');
     const total = document.querySelector('[data-portfolio-total]');
     if (!body) return;
     if (total) total.textContent = fmtUSD(totalUsd);
+
+    /* Total balance card: total + allocation bar + a chip for every coin held */
+    const held = {};
+    coins.forEach(c => { held[String(c.base).toUpperCase()] = c; });
+    window.__vxHeld = held;
+    window.dispatchEvent(new Event('vx-held'));
+    const tEl = document.querySelector('[data-assets-total]');
+    if (tEl) tEl.textContent = fmtUSD(totalUsd);
+    const sub = document.querySelector('[data-assets-sub]');
+    if (sub) sub.textContent = coins.length ? coins.length + (coins.length === 1 ? ' asset' : ' assets') + ' held · live market prices' : 'No assets yet — deposit a coin to get started';
+    const PAL = ['#6C7CFF', '#16c784', '#f7a600', '#ea3943', '#00bcd4', '#e91e63', '#9c27b0', '#8bc34a'];
+    const sorted = coins.slice().sort((a, b) => (b.value || 0) - (a.value || 0));
+    const bar = document.querySelector('[data-assets-bar]');
+    if (bar) bar.innerHTML = totalUsd > 0 ? sorted.map((c, i) => `<i style="width:${Math.max(0.5, (c.value / totalUsd) * 100).toFixed(2)}%;background:${PAL[i % PAL.length]}" title="${c.base}"></i>`).join('') : '';
+    const chips = document.querySelector('[data-assets-chips]');
+    if (chips) chips.innerHTML = sorted.length ? sorted.map((c, i) => `
+      <div class="at-chip">
+        <img src="${VaultexBalances.logoUrl(c.base)}" alt="" onerror="this.style.visibility='hidden'">
+        <div><b><span class="dot" style="background:${PAL[i % PAL.length]};display:inline-block;margin-right:6px;"></span>${c.base}</b>
+        <small>${fmtQty(c.qty)} · ${fmtUSD(c.value)}${totalUsd > 0 ? ' · ' + ((c.value / totalUsd) * 100).toFixed(1) + '%' : ''}</small></div>
+      </div>`).join('') : '';
     if (!coins.length) {
       body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">No assets yet — make a deposit to get started.</td></tr>';
       return;
@@ -485,7 +541,7 @@
         <td><div class="holding-cell">
           <img src="${VaultexBalances.logoUrl(c.base)}" alt="" onerror="this.style.visibility='hidden'">
           <div><div class="holding-name" style="font-weight:600;">${c.base}</div>
-          <div class="asset-sym">${c.base}/USDT</div></div></div></td>
+          <div class="asset-sym">${c.base === 'USDT' ? 'Tether' : c.base + '/USDT'}</div></div></div></td>
         <td class="mono">${fmtQty(c.qty)}</td>
         <td class="mono">${fmtUSD(c.price)}</td>
         <td class="mono ${c.pct>=0?'pnl-up':'pnl-down'}" style="color:${c.pct>=0?'#16c784':'#ea3943'}">${fmtPct(c.pct)}</td>
