@@ -1,0 +1,271 @@
+/* =========================================================
+   TRADING-WALLET.JS — connects the Trading Center to the demo wallet
+   (demo-ledger.js). Replaces trading-deposits.js.
+
+   The wallet is the single source of truth:
+     • USDT in the wallet            = "Available balance" on the Trading Center
+     • every other coin in the wallet = a holding you can select and sell
+     • every buy / sell you place     = written straight back to the wallet,
+       so the Dashboard, Assets, Withdraw and Deposit pages all follow.
+
+   The trading page's own code is not changed: it keeps reading/writing
+   localStorage keys "vaultex_practice_trade_balance_usdt" and
+   "vaultex_practice_trade_holdings". This script mirrors those keys
+   to/from the wallet in both directions.
+
+   Script order on trading.html (bottom of the page):
+     firebase-init.js -> demo-ledger.js (early) ... inline trading script
+     -> trading-wallet.js -> trading-indicators.js
+   ========================================================= */
+(function () {
+  'use strict';
+  console.log('[trading-wallet] loaded');
+
+  const LS_BAL = 'vaultex_practice_trade_balance_usdt';
+  const LS_HOLD = 'vaultex_practice_trade_holdings';
+  const WALLET_KEY = uid => 'vaultex_demo_wallet_' + uid;
+
+  const V = () => window.VaultexDemo;
+  const T = () => window.__vxTerminal;
+  const $ = s => document.querySelector(s);
+  const fmtUSD = n => '$' + (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtQty = n => (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+  const floor8 = n => Math.floor((Number(n) || 0) * 1e8 + 1e-6) / 1e8;
+
+  let uid = null;
+  let ready = false;       // first pull from the wallet finished
+  let syncing = false;     // we are the ones writing localStorage right now
+  let pushTimer = null;
+  let openedOwned = false;
+
+  const readJSON = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+
+  /* ---------- watch the page's own writes so we can push them to the wallet ---------- */
+  const rawSetItem = Storage.prototype.setItem;
+  Storage.prototype.setItem = function (k, v) {
+    rawSetItem.call(this, k, v);
+    if (this === window.localStorage && !syncing && ready && (k === LS_BAL || k === LS_HOLD)) schedulePush();
+  };
+  function schedulePush() {
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(pushToWallet, 0);
+  }
+
+  function pushToWallet() {
+    if (!uid || !V() || !V().setCoins) return;
+    const bal = parseFloat(localStorage.getItem(LS_BAL) || '0') || 0;
+    const hold = readJSON(LS_HOLD, {});
+    const coins = { USDT: floor8(bal) };
+    Object.keys(hold).forEach(sym => {
+      const base = sym.replace(/USDT$/, '');
+      const q = Number(hold[sym] && hold[sym].qty) || 0;
+      if (q > 1e-9) coins[base] = floor8(q);
+    });
+    syncing = true;
+    try { V().setCoins(uid, coins); } finally { syncing = false; }
+    renderPanel();
+  }
+
+  /* ---------- wallet -> trading page ---------- */
+  async function priceFor(base) {
+    const t = T();
+    const p = t && t.getPrice ? t.getPrice(base) : null;
+    if (p) return p;
+    try { return await V().getPrice(base); } catch (e) { return 0; }
+  }
+
+  function applyWallet(raw, prices) {
+    const oldHold = readJSON(LS_HOLD, {});
+    const next = {};
+    Object.keys(raw).forEach(base => {
+      if (base === 'USDT') return;
+      const qty = Number(raw[base]) || 0;
+      if (qty <= 1e-9) return;
+      const sym = base + 'USDT';
+      const old = oldHold[sym];
+      const price = prices[base] || (old && old.costBasis) || 0;
+      let cost = price;
+      if (old && old.qty > 0) {
+        cost = old.costBasis;
+        if (qty > old.qty + 1e-9 && price) cost = (old.qty * old.costBasis + (qty - old.qty) * price) / qty;
+      }
+      next[sym] = { qty, costBasis: cost };
+    });
+    syncing = true;
+    try {
+      rawSetItem.call(localStorage, LS_BAL, String(Number(raw.USDT) || 0));
+      rawSetItem.call(localStorage, LS_HOLD, JSON.stringify(next));
+    } finally { syncing = false; }
+  }
+
+  async function pull(initial) {
+    if (!uid || !V() || !V().getCoins) return;
+    const raw = V().getCoins(uid);
+    const prices = {};
+    const bases = Object.keys(raw).filter(b => b !== 'USDT' && Number(raw[b]) > 0);
+    for (const b of bases) prices[b] = await priceFor(b);
+    applyWallet(raw, prices);
+    ready = true;
+    if (T() && T().rerender) T().rerender();
+    renderPanel();
+    if (initial) openOnOwnedCoin(raw, prices);
+  }
+
+  /* synchronous variant used right before a trade, using the live ticker prices already on the page */
+  function pullNow() {
+    if (!uid || !V() || !V().getCoins) return;
+    const raw = V().getCoins(uid);
+    const prices = {};
+    Object.keys(raw).forEach(b => { if (b !== 'USDT') prices[b] = T() && T().getPrice ? T().getPrice(b) : 0; });
+    applyWallet(raw, prices);
+  }
+
+  function openOnOwnedCoin(raw, prices) {
+    if (openedOwned || !T() || !T().selectSymbol) return;
+    openedOwned = true;
+    if (new URLSearchParams(location.search).get('symbol')) return;
+    let best = null, bestVal = 0;
+    Object.keys(raw).forEach(b => {
+      if (b === 'USDT') return;
+      const val = (Number(raw[b]) || 0) * (prices[b] || 0);
+      if (val > bestVal && T().hasTicker && T().hasTicker(b + 'USDT')) { best = b; bestVal = val; }
+    });
+    if (best) T().selectSymbol(best + 'USDT');
+  }
+
+  /* ---------- guard: never let a trade run on a stale / not-yet-loaded wallet ---------- */
+  function guardSubmit() {
+    const btn = $('[data-submit-btn]');
+    if (!btn) return;
+    btn.addEventListener('click', e => {
+      if (!ready) {
+        e.stopImmediatePropagation(); e.preventDefault();
+        const m = $('[data-ticket-msg]');
+        if (m) { m.className = 'ticket-msg err'; m.textContent = 'Loading your wallet… try again in a second.'; }
+        return;
+      }
+      pullNow();   // pick up a deposit made in another tab a moment ago
+    }, true);
+  }
+
+  /* ---------- wallet panel (total balance + coin balances) ---------- */
+  function ensurePanel() {
+    let p = $('#vx-wallet-panel');
+    if (p) return p;
+    const header = $('.trading-header');
+    if (!header) return null;
+    p = document.createElement('div');
+    p.id = 'vx-wallet-panel';
+    p.className = 'widget';
+    p.style.cssText = 'margin-bottom:18px;padding:16px 18px;';
+    p.innerHTML = `
+      <style>
+        #vx-wallet-panel .vw-top{display:flex;flex-wrap:wrap;gap:26px;align-items:flex-end;margin-bottom:12px;}
+        #vx-wallet-panel .vw-k{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;}
+        #vx-wallet-panel .vw-v{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.05rem;}
+        #vx-wallet-panel .vw-v.big{font-size:1.6rem;}
+        #vx-wallet-panel .vw-coins{display:flex;flex-wrap:wrap;gap:8px;}
+        #vx-wallet-panel .vw-coin{display:flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid var(--line);border-radius:10px;background:transparent;color:inherit;cursor:pointer;font:inherit;text-align:left;}
+        #vx-wallet-panel .vw-coin:hover,#vx-wallet-panel .vw-coin.active{border-color:var(--accent,#6C7CFF);background:var(--ink-soft);}
+        #vx-wallet-panel .vw-coin.cash{cursor:default;}
+        #vx-wallet-panel .vw-coin b{font-size:.84rem;}
+        #vx-wallet-panel .vw-coin small{display:block;color:var(--muted);font-size:.7rem;font-family:'JetBrains Mono',monospace;}
+        #vx-wallet-panel .vw-empty{color:var(--muted);font-size:.84rem;}
+        .market-row.vx-owned{box-shadow:inset 3px 0 0 var(--accent,#6C7CFF);}
+        .market-row .vx-owned-badge{display:block;font-size:.62rem;color:var(--accent,#6C7CFF);font-family:'JetBrains Mono',monospace;margin-top:2px;}
+      </style>
+      <div class="vw-top">
+        <div><div class="vw-k">Total balance</div><div class="vw-v big" data-vw-total>$0.00</div></div>
+        <div><div class="vw-k">Available (USDT)</div><div class="vw-v" data-vw-cash>$0.00</div></div>
+        <div><div class="vw-k">Coins value</div><div class="vw-v" data-vw-coins>$0.00</div></div>
+      </div>
+      <div class="vw-coins" data-vw-list><span class="vw-empty">Loading wallet…</span></div>`;
+    header.insertAdjacentElement('afterend', p);
+    return p;
+  }
+
+  function holdingsNow() {
+    const hold = readJSON(LS_HOLD, {});
+    return Object.keys(hold).map(sym => {
+      const h = hold[sym];
+      const base = sym.replace(/USDT$/, '');
+      const live = T() && T().getPrice ? T().getPrice(base) : null;
+      const price = live || h.costBasis || 0;
+      return { sym, base, qty: h.qty, price, value: h.qty * price };
+    }).filter(x => x.qty > 1e-9).sort((a, b) => b.value - a.value);
+  }
+
+  function renderPanel() {
+    const p = ensurePanel();
+    if (!p) return;
+    const cash = parseFloat(localStorage.getItem(LS_BAL) || '0') || 0;
+    const hs = holdingsNow();
+    const coinsVal = hs.reduce((s, x) => s + x.value, 0);
+    p.querySelector('[data-vw-total]').textContent = fmtUSD(cash + coinsVal);
+    p.querySelector('[data-vw-cash]').textContent = fmtUSD(cash);
+    p.querySelector('[data-vw-coins]').textContent = fmtUSD(coinsVal);
+    const sel = T() && T().getSymbol ? T().getSymbol() : '';
+    const list = p.querySelector('[data-vw-list]');
+    const cashChip = `<div class="vw-coin cash"><div><b>USDT</b><small>${fmtQty(cash)} · ${fmtUSD(cash)}</small></div></div>`;
+    const coinChips = hs.map(x => `<button class="vw-coin ${x.sym === sel ? 'active' : ''}" data-vw-pick="${x.sym}" title="Trade ${x.base}/USDT">
+        <div><b>${x.base}</b><small>${fmtQty(x.qty)} · ${fmtUSD(x.value)}</small></div></button>`).join('');
+    list.innerHTML = cashChip + (coinChips || '') + (!hs.length ? `<span class="vw-empty" style="align-self:center;margin-left:6px;">No coins yet — <a href="deposits.html">deposit</a> one to trade it here.</span>` : '');
+    list.querySelectorAll('[data-vw-pick]').forEach(b => b.addEventListener('click', () => {
+      if (T() && T().selectSymbol) T().selectSymbol(b.dataset.vwPick);
+      renderPanel();
+      const cp = document.querySelector('[data-chart-panel]');
+      if (cp) window.scrollTo({ top: cp.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+    }));
+    decorateMarketRows(hs);
+  }
+
+  /* ---------- pin deposited coins to the top of the market list ---------- */
+  let rowObserver = null;
+  function decorateMarketRows(hs) {
+    const box = $('[data-market-rows]');
+    if (!box) return;
+    hs = hs || holdingsNow();
+    const owned = new Map(hs.map(x => [x.sym, x]));
+    if (rowObserver) rowObserver.disconnect();
+    const rows = Array.from(box.querySelectorAll('.market-row'));
+    const ownedRows = rows.filter(r => owned.has(r.dataset.symbol));
+    ownedRows.slice().reverse().forEach(r => box.insertBefore(r, box.firstChild));
+    rows.forEach(r => {
+      const o = owned.get(r.dataset.symbol);
+      r.classList.toggle('vx-owned', !!o);
+      let b = r.querySelector('.vx-owned-badge');
+      if (o) {
+        if (!b) { b = document.createElement('span'); b.className = 'vx-owned-badge'; const nameBox = r.querySelector('.m-name'); (nameBox ? nameBox.parentNode : r).appendChild(b); }
+        b.textContent = 'Held: ' + fmtQty(o.qty);
+      } else if (b) b.remove();
+    });
+    if (rowObserver) rowObserver.observe(box, { childList: true });
+  }
+  function watchMarketRows() {
+    const box = $('[data-market-rows]');
+    if (!box || !window.MutationObserver) return;
+    rowObserver = new MutationObserver(() => decorateMarketRows());
+    rowObserver.observe(box, { childList: true });
+  }
+
+  /* ---------- boot ---------- */
+  function start() {
+    if (!window.VaultexDemo) return setTimeout(start, 100);
+    guardSubmit();
+    watchMarketRows();
+    ensurePanel();
+    V().whenUser(u => {
+      const first = uid !== u.uid;
+      uid = u.uid;
+      if (first) { ready = false; pull(true); }
+    });
+    // deposits / withdrawals made on another page or tab
+    window.addEventListener('storage', e => {
+      if (uid && e.key === WALLET_KEY(uid)) pull(false);
+    });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && uid && ready) pull(false); });
+    window.addEventListener('pageshow', e => { if (e.persisted && uid) pull(false); });
+    setInterval(renderPanel, 3000);          // keep totals in step with live prices / selected pair
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
