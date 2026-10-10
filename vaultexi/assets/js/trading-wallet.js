@@ -145,42 +145,58 @@
         return;
       }
       pullNow();   // pick up a deposit made in another tab a moment ago
+      setTimeout(() => {
+        const m = $('[data-ticket-msg]');
+        if (m && /exceeds your available balance/i.test(m.textContent)) m.textContent = 'Not enough USDT to buy. Sell a coin first or deposit USDT.';
+      }, 0);
     }, true);
   }
 
-  /* ---------- wallet panel (total balance + coin balances) ---------- */
+  /* ---------- wallet bar: Total balance + coin assets (same bar in full screen) ---------- */
   function ensurePanel() {
     let p = $('#vx-wallet-panel');
-    if (p) return p;
-    const header = $('.trading-header');
-    if (!header) return null;
-    p = document.createElement('div');
-    p.id = 'vx-wallet-panel';
-    p.className = 'widget';
-    p.style.cssText = 'margin-bottom:18px;padding:16px 18px;';
-    p.innerHTML = `
-      <style>
-        #vx-wallet-panel .vw-top{display:flex;flex-wrap:wrap;gap:26px;align-items:flex-end;margin-bottom:12px;}
-        #vx-wallet-panel .vw-k{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;}
-        #vx-wallet-panel .vw-v{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.05rem;}
-        #vx-wallet-panel .vw-v.big{font-size:1.6rem;}
-        #vx-wallet-panel .vw-coins{display:flex;flex-wrap:wrap;gap:8px;}
-        #vx-wallet-panel .vw-coin{display:flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid var(--line);border-radius:10px;background:transparent;color:inherit;cursor:pointer;font:inherit;text-align:left;}
-        #vx-wallet-panel .vw-coin:hover,#vx-wallet-panel .vw-coin.active{border-color:var(--accent,#6C7CFF);background:var(--ink-soft);}
-        #vx-wallet-panel .vw-coin.cash{cursor:default;}
-        #vx-wallet-panel .vw-coin b{font-size:.84rem;}
-        #vx-wallet-panel .vw-coin small{display:block;color:var(--muted);font-size:.7rem;font-family:'JetBrains Mono',monospace;}
-        #vx-wallet-panel .vw-empty{color:var(--muted);font-size:.84rem;}
+    if (!p) {
+      const header = $('.trading-header');
+      if (!header) return null;
+      p = document.createElement('div');
+      p.id = 'vx-wallet-panel';
+      p.className = 'widget vx-wallet';
+      header.insertAdjacentElement('afterend', p);
+      const st = document.createElement('style');
+      st.textContent = `
+        .trading-header .balance-chip{display:none;}
+        .vx-wallet{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:12px 16px;margin-bottom:14px;}
+        .vx-wallet .vw-total{padding-right:18px;border-right:1px solid var(--line);}
+        .vx-wallet .vw-k{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;}
+        .vx-wallet .vw-v{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.5rem;line-height:1.1;}
+        .vx-wallet .vw-coins{display:flex;flex-wrap:wrap;gap:8px;flex:1;min-width:0;}
+        .vw-coin{display:flex;align-items:center;gap:8px;padding:6px 11px;border:1px solid var(--line);border-radius:10px;background:transparent;color:inherit;cursor:pointer;font:inherit;text-align:left;}
+        .vw-coin:hover,.vw-coin.active{border-color:var(--accent,#6C7CFF);background:var(--ink-soft);}
+        .vw-coin.cash{cursor:default;}.vw-coin.cash:hover{border-color:var(--line);background:transparent;}
+        .vw-coin b{font-size:.82rem;display:block;}
+        .vw-coin small{display:block;color:var(--muted);font-size:.68rem;font-family:'JetBrains Mono',monospace;}
+        .vw-empty{color:var(--muted);font-size:.84rem;}
         .market-row.vx-owned{box-shadow:inset 3px 0 0 var(--accent,#6C7CFF);}
         .market-row .vx-owned-badge{display:block;font-size:.62rem;color:var(--accent,#6C7CFF);font-family:'JetBrains Mono',monospace;margin-top:2px;}
-      </style>
-      <div class="vw-top">
-        <div><div class="vw-k">Total balance</div><div class="vw-v big" data-vw-total>$0.00</div></div>
-        <div><div class="vw-k">Available (USDT)</div><div class="vw-v" data-vw-cash>$0.00</div></div>
-        <div><div class="vw-k">Coins value</div><div class="vw-v" data-vw-coins>$0.00</div></div>
-      </div>
-      <div class="vw-coins" data-vw-list><span class="vw-empty">Loading wallet…</span></div>`;
-    header.insertAdjacentElement('afterend', p);
+        /* full-screen copy of the bar */
+        .fs-balances{display:none !important;}
+        #vx-fs-wallet{display:none;}
+        .terminal-fullscreen-root.is-fullscreen #vx-fs-wallet{display:flex;align-items:center;gap:12px;margin-left:auto;min-width:0;overflow-x:auto;}
+        #vx-fs-wallet .vw-total{padding-right:12px;border-right:1px solid var(--line);white-space:nowrap;}
+        #vx-fs-wallet .vw-v{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.05rem;}
+        #vx-fs-wallet .vw-k{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+        #vx-fs-wallet .vw-coins{display:flex;gap:6px;}
+        #vx-fs-wallet .vw-coin{padding:4px 9px;white-space:nowrap;}
+        @media (max-width:640px){.vx-wallet{gap:10px;padding:10px 12px;}.vx-wallet .vw-v{font-size:1.2rem;}.vx-wallet .vw-total{border-right:0;padding-right:0;width:100%;}}
+      `;
+      document.head.appendChild(st);
+    }
+    const fsBar = $('[data-fullscreen-bar]');
+    if (fsBar && !$('#vx-fs-wallet')) {
+      const f = document.createElement('div'); f.id = 'vx-fs-wallet';
+      const exit = fsBar.querySelector('[data-fullscreen-exit]');
+      fsBar.insertBefore(f, exit || null);
+    }
     return p;
   }
 
@@ -195,27 +211,33 @@
     }).filter(x => x.qty > 1e-9).sort((a, b) => b.value - a.value);
   }
 
+  function walletHTML(cash, hs, sel) {
+    const total = cash + hs.reduce((s, x) => s + x.value, 0);
+    const chips = (cash > 0.005 || !hs.length ? `<div class="vw-coin cash"><div><b>USDT</b><small>${fmtQty(cash)}</small></div></div>` : '') +
+      hs.map(x => `<button class="vw-coin ${x.sym === sel ? 'active' : ''}" data-vw-pick="${x.sym}" title="Trade ${x.base}/USDT"><div><b>${x.base}</b><small>${fmtQty(x.qty)} · ${fmtUSD(x.value)}</small></div></button>`).join('') +
+      (!hs.length ? `<span class="vw-empty">No coins yet — <a href="deposits.html">deposit</a> one to trade it here.</span>` : '');
+    return `<div class="vw-total"><div class="vw-k">Total balance</div><div class="vw-v">${fmtUSD(total)}</div></div><div class="vw-coins">${chips}</div>`;
+  }
+
   function renderPanel() {
     const p = ensurePanel();
     if (!p) return;
     const cash = parseFloat(localStorage.getItem(LS_BAL) || '0') || 0;
     const hs = holdingsNow();
-    const coinsVal = hs.reduce((s, x) => s + x.value, 0);
-    p.querySelector('[data-vw-total]').textContent = fmtUSD(cash + coinsVal);
-    p.querySelector('[data-vw-cash]').textContent = fmtUSD(cash);
-    p.querySelector('[data-vw-coins]').textContent = fmtUSD(coinsVal);
     const sel = T() && T().getSymbol ? T().getSymbol() : '';
-    const list = p.querySelector('[data-vw-list]');
-    const cashChip = `<div class="vw-coin cash"><div><b>USDT</b><small>${fmtQty(cash)} · ${fmtUSD(cash)}</small></div></div>`;
-    const coinChips = hs.map(x => `<button class="vw-coin ${x.sym === sel ? 'active' : ''}" data-vw-pick="${x.sym}" title="Trade ${x.base}/USDT">
-        <div><b>${x.base}</b><small>${fmtQty(x.qty)} · ${fmtUSD(x.value)}</small></div></button>`).join('');
-    list.innerHTML = cashChip + (coinChips || '') + (!hs.length ? `<span class="vw-empty" style="align-self:center;margin-left:6px;">No coins yet — <a href="deposits.html">deposit</a> one to trade it here.</span>` : '');
-    list.querySelectorAll('[data-vw-pick]').forEach(b => b.addEventListener('click', () => {
-      if (T() && T().selectSymbol) T().selectSymbol(b.dataset.vwPick);
-      renderPanel();
-      const cp = document.querySelector('[data-chart-panel]');
-      if (cp) window.scrollTo({ top: cp.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
-    }));
+    const html = walletHTML(cash, hs, sel);
+    [p, $('#vx-fs-wallet')].forEach(box => {
+      if (!box) return;
+      if (box.dataset.sig === html) return;           // nothing changed — don't touch the DOM
+      box.dataset.sig = html; box.innerHTML = html;
+      box.querySelectorAll('[data-vw-pick]').forEach(b => b.addEventListener('click', () => {
+        if (T() && T().selectSymbol) T().selectSymbol(b.dataset.vwPick);
+        renderPanel();
+        const fs = document.querySelector('.terminal-fullscreen-root.is-fullscreen');
+        const cp = document.querySelector('[data-chart-panel]');
+        if (!fs && cp) window.scrollTo({ top: cp.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+      }));
+    });
     decorateMarketRows(hs);
   }
 
