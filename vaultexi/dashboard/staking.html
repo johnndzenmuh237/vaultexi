@@ -220,8 +220,7 @@ img{display:block;max-width:100%}
 
 <div class="wallet-strip">
   <div class="container">
-    <div class="w-stat" id="totalBalStat"><span class="lbl">Total balance</span><span class="val" id="totalBalVal">$0.00</span></div>
-    <div class="w-stat" id="usdtBalStat"><span class="lbl">Available USDT</span><span class="val" id="usdtBal">$0.00</span></div>
+    <div class="w-stat" id="usdtBalStat" style="display:none"><span class="val" id="usdtBal">$0.00</span></div><span id="totalBalVal" style="display:none"></span>
     <div class="w-stat"><span class="lbl">Total staked (est.)</span><span class="val" id="totalStakedVal">$0.00</span></div>
     <div class="w-stat"><span class="lbl">Unclaimed rewards (est.)</span><span class="val" id="totalRewardVal" style="color:var(--mint)">$0.00</span></div>
     <div class="w-stat"><span class="lbl">Est. weekly profit</span><span class="val" id="totalWeeklyVal" style="color:var(--mint)">$0.00</span></div>
@@ -235,6 +234,10 @@ img{display:block;max-width:100%}
     <h1>Choose a plan. Stake. Watch it grow.</h1>
     <p>Pick a staking plan for each asset — flexible or fixed-term — and track your rewards accrue in real time, down to the second.</p>
   </div>
+</section>
+
+<section class="section-sm" style="padding-bottom:0">
+  <div class="container"><div id="walletCard"></div></div>
 </section>
 
 <section class="section-sm">
@@ -358,6 +361,7 @@ img{display:block;max-width:100%}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="../assets/js/firebase-init.js"></script>
 <script src="../assets/js/demo-ledger.js"></script>
+<script src="../assets/js/wallet-card.js"></script>
 
 <script>
 (function(){
@@ -377,6 +381,8 @@ img{display:block;max-width:100%}
   const LS_HIST  = 'vaultex_demo_staking_history';
   const V = window.VaultexDemo;
   let UID = null;
+  let WALLET_COINS = [];
+  let CARD = null;
   let WALLET_TOTAL = 0;          // free wallet value in USD (from the ledger)
 
   /* free coins in the wallet, keyed by lower-case symbol (btc, eth, usdt ...) */
@@ -483,7 +489,7 @@ img{display:block;max-width:100%}
       reward += computeReward(s)*p;
       weekly += weeklyReward(s.amount, s.apy)*p;
     });
-    $('totalBalVal').textContent = fmtUSD(WALLET_TOTAL + staked + reward);
+    if(CARD) CARD.update({ coins: WALLET_COINS, stakedUsd: staked + reward });
     $('totalStakedVal').textContent = fmtUSD(staked);
     $('totalRewardVal').textContent = fmtUSD(reward);
     $('totalWeeklyVal').textContent = fmtUSD(weekly);
@@ -751,10 +757,11 @@ img{display:block;max-width:100%}
   window.addEventListener('vaultex:deposit-finished', refreshAll);   // wallet changed (trade, deposit, other tab)
   document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) refreshAll(); });
 
+  if(window.VaultexWalletCard) CARD = VaultexWalletCard.mount($('walletCard'));
   if(V){
     V.whenUser(user=>{
       UID = user.uid;
-      V.onWallet(UID, w=>{ WALLET_TOTAL = w.totalUsd||0; refreshAll(); });
+      V.onWallet(UID, w=>{ WALLET_TOTAL = w.totalUsd||0; WALLET_COINS = w.coins||[]; refreshAll(); });
       refreshAll();
     });
   }
