@@ -123,7 +123,13 @@
   function openOnOwnedCoin(raw, prices) {
     if (openedOwned || !T() || !T().selectSymbol) return;
     openedOwned = true;
-    if (new URLSearchParams(location.search).get('symbol')) return;
+    const qs = new URLSearchParams(location.search);
+    const want = (qs.get('symbol') || (qs.get('coin') ? qs.get('coin') + 'USDT' : '')).toUpperCase();
+    if (want) {                       // e.g. coming from the Assets page: trading.html?coin=ETH
+      let tries = 0;
+      const t = setInterval(() => { if (T().hasTicker && T().hasTicker(want)) { clearInterval(t); T().selectSymbol(want); } else if (++tries > 60) clearInterval(t); }, 250);
+      return;
+    }
     let best = null, bestVal = 0;
     Object.keys(raw).forEach(b => {
       if (b === 'USDT') return;
