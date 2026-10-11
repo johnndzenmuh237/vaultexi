@@ -31,14 +31,20 @@
 .earn-total{border:1px solid var(--mint);background:linear-gradient(180deg,var(--mint-dim, rgba(0,217,163,.10)),transparent 75%),var(--ink-soft);margin-bottom:24px;animation:earnRise .5s ease both;}
 .earn-total-amount{font-family:var(--font-mono);font-weight:700;font-size:clamp(2rem,6vw,2.8rem);line-height:1.1;color:var(--mint);overflow-wrap:anywhere;margin:6px 0 4px;}
 .earn-total-note{font-size:.78rem;color:var(--muted);margin-bottom:16px;line-height:1.5;}
-.earn-break{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.earn-break{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;}
+.earn-break .earn-stat .sub{font-size:.68rem;color:var(--muted);margin-top:2px;font-family:var(--font-mono);}
+.earn-stat .val.neg{color:var(--coral,#ff5c72)} .earn-stat .val.pos{color:var(--mint)}
+.earn-src{display:inline-block;font-size:.63rem;padding:2px 7px;border-radius:4px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+.earn-src.Trading{background:rgba(108,124,255,.15);color:#8e9bff}.earn-src.AutoTrading{background:rgba(0,229,255,.12);color:#00E5FF}.earn-src.Staking{background:rgba(60,220,150,.12);color:var(--mint)}.earn-src.NFT{background:rgba(192,132,252,.15);color:#c084fc}
+.pnl-pos{color:var(--mint)}.pnl-neg{color:var(--coral,#ff5c72)}
+@media (max-width:1024px){ .earn-break{grid-template-columns:repeat(2,minmax(0,1fr));} }
 .earn-break .earn-stat{background:var(--ink-raise);border-radius:10px;padding:12px 14px;min-width:0;}
 .earn-break .earn-stat .val{font-size:1.1rem;overflow-wrap:anywhere;}
 .earn-live{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:.66rem;color:var(--mint);}
 .earn-live i{width:7px;height:7px;border-radius:50%;background:var(--mint);animation:earnPulse 1.8s infinite;}
 @keyframes earnPulse{0%{box-shadow:0 0 0 0 rgba(0,217,163,.6);}100%{box-shadow:0 0 0 9px rgba(0,217,163,0);}}
 @keyframes earnRise{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
-@media (max-width:640px){ .earn-break{grid-template-columns:1fr;} }
+@media (max-width:480px){ .earn-break{grid-template-columns:1fr;} }
 @media (prefers-reduced-motion:reduce){ .earn-total,.earn-live i{animation:none;} }
 </style>
 </head>
@@ -58,7 +64,7 @@
       <div>
         <button class="sidebar-burger" data-sidebar-toggle aria-label="Toggle menu"><span></span><span></span><span></span></button>
         <h2 class="mb-0" style="font-size:1.5rem;">Earnings</h2>
-        <p class="mb-0" style="font-size:.88rem;">Trading, AutoTrading, Staking, and NFT activity — real funds and local activity always shown separately.</p>
+        <p class="mb-0" style="font-size:.88rem;">Everything you earn from Trading, AutoTrading, Staking and NFTs, in one place.</p>
       </div>
       <div class="flex" style="gap:14px;">
         <button class="theme-toggle" aria-label="Toggle theme">☾</button>
@@ -77,105 +83,71 @@
       <span class="pill pill-neutral" data-balance-pill>— $0.00 this week</span>
     </div>
 
-    <!-- Earnings balance: VaultexBotTrade + staking, in USD -->
+    <!-- Total earnings: all four sources, in USD -->
     <div class="widget earn-total">
-      <div class="widget-head"><h3>Earnings balance</h3><span class="earn-live"><i></i>Live</span></div>
+      <div class="widget-head"><h3>Total earnings</h3><span class="earn-live"><i></i>Live</span></div>
       <div class="earn-total-amount" data-earnings-total>$0.00</div>
-      <p class="earn-total-note" data-earnings-note>VaultexBotTrade and staking earnings combined, in USD. Staking rewards use current market prices.</p>
+      <p class="earn-total-note" data-earnings-note>Trading, AutoTrading, staking and NFT earnings combined, in USD at current market prices.</p>
       <div class="earn-break">
-        <div class="earn-stat" data-earn-stat="earn-bot">
-          <div class="val" data-val>$0.00</div>
-          <div class="lbl">VaultexBotTrade earnings</div>
-        </div>
-        <div class="earn-stat" data-earn-stat="earn-stake-paid">
-          <div class="val" data-val>$0.00</div>
-          <div class="lbl">Staking rewards paid out</div>
-        </div>
-        <div class="earn-stat" data-earn-stat="earn-stake-live">
-          <div class="val" data-val>$0.0000</div>
-          <div class="lbl">Staking rewards accruing now</div>
-        </div>
+        <div class="earn-stat" data-earn-stat="earn-trading"><div class="val" data-val>$0.00</div><div class="lbl">Trading earnings</div><div class="sub" data-sub></div></div>
+        <div class="earn-stat" data-earn-stat="earn-bot"><div class="val" data-val>$0.00</div><div class="lbl">AutoTrading earnings</div><div class="sub" data-sub></div></div>
+        <div class="earn-stat" data-earn-stat="earn-staking"><div class="val" data-val>$0.00</div><div class="lbl">Staking earnings</div><div class="sub" data-sub></div></div>
+        <div class="earn-stat" data-earn-stat="earn-nft"><div class="val" data-val>$0.00</div><div class="lbl">NFT earnings</div><div class="sub" data-sub></div></div>
       </div>
     </div>
 
-    <div class="earn-notice">Trading P&amp;L is pulled from your Firestore trade history. Bot, Staking, and NFT figures below are activity stored locally — they're isolated from your balance and won't appear on another device. The Earnings balance card adds up VaultexBotTrade and staking, and that amount is also included in your Total balance.</div>
+    <!-- Assets: same card as the Assets page -->
+    <div id="walletCard" style="margin-bottom:24px;"></div>
+
+    <div class="earn-notice">Every figure here comes from your Vaultex wallet activity and is added to your Total balance. Trading earnings are the profit or loss on coins you have sold; staking earnings are rewards paid out plus rewards accruing now; NFT earnings are the change in value of your collection since you minted it.</div>
 
     <!-- Trading -->
-    <div class="earn-section-label">Markets trading</div>
+    <div class="earn-section-label">Markets trading <a href="trading.html" class="btn-wallet" style="margin-left:auto;">Open trading</a></div>
     <div class="earn-grid">
-      <div class="widget earn-stat" data-earn-stat="all-time">
-        <div class="val" data-val>$0.00</div>
-        <div class="lbl">All-time P&amp;L</div>
-      </div>
-      <div class="widget earn-stat" data-earn-stat="week">
-        <div class="val" data-val>$0.00</div>
-        <div class="lbl">This week's P&amp;L</div>
-      </div>
+      <div class="widget earn-stat" data-earn-stat="all-time"><div class="val" data-val>$0.00</div><div class="lbl">All-time P&amp;L</div></div>
+      <div class="widget earn-stat" data-earn-stat="week"><div class="val" data-val>$0.00</div><div class="lbl">This week's P&amp;L</div></div>
       <div class="widget" style="grid-column: span 2;">
         <div class="widget-head"><h3>P&amp;L over time</h3></div>
-        <canvas data-chart="trading-pnl" width="600" height="100"></canvas>
-        <p data-trading-empty style="color:var(--muted);font-size:.8rem;margin-top:10px;display:none;">No closed trades yet.</p>
+        <canvas id="pnlChart" height="100" style="width:100%;height:100px;display:block"></canvas>
+        <p data-trading-empty style="color:var(--muted);font-size:.8rem;margin-top:10px;display:none;">No closed trades yet — sell a coin on the Trading page to see your profit or loss here.</p>
       </div>
     </div>
 
     <!-- Bot -->
-    <div class="earn-section-label">VaultexBotTrade <a href="https://swap-opb6.vercel.app/" class="btn-wallet" style="margin-left:auto;">Connect Wallet</a></div>
+    <div class="earn-section-label">AutoTrading <a href="trading-bot.html" class="btn-wallet" style="margin-left:auto;">Open bot</a></div>
     <div class="earn-grid">
-      <div class="widget earn-stat" data-earn-stat="bot-session">
-        <div class="val" data-val>$0.00</div>
-        <div class="lbl">Session earnings</div>
-      </div>
-      <div class="widget earn-stat" data-earn-stat="bot-rate">
-        <div class="val" data-val>—</div>
-        <div class="lbl">Daily target rate</div>
-      </div>
-      <div class="widget earn-stat" data-earn-stat="bot-status" style="grid-column: span 2;">
-        <div class="val" data-val>Idle</div>
-        <div class="lbl">Status</div>
-      </div>
+      <div class="widget earn-stat" data-earn-stat="bot-total"><div class="val" data-val>$0.00</div><div class="lbl">All-time bot earnings</div></div>
+      <div class="widget earn-stat" data-earn-stat="bot-session"><div class="val" data-val>$0.00</div><div class="lbl">This session</div></div>
+      <div class="widget earn-stat" data-earn-stat="bot-rate"><div class="val" data-val>—</div><div class="lbl">Daily target rate</div></div>
+      <div class="widget earn-stat" data-earn-stat="bot-status"><div class="val" data-val>Idle</div><div class="lbl">Status</div></div>
     </div>
 
     <!-- Staking -->
-    <div class="earn-section-label">Staking <a href="https://swap-opb6.vercel.app/" class="btn-wallet" style="margin-left:auto;">Connect Wallet</a></div>
+    <div class="earn-section-label">Staking <a href="staking.html" class="btn-wallet" style="margin-left:auto;">Open staking</a></div>
     <div class="earn-grid">
-      <div class="widget earn-stat" data-earn-stat="staking-active">
-        <div class="val" data-val>$0.00</div>
-        <div class="lbl">Unrealized rewards (active stakes)</div>
-      </div>
-      <div class="widget earn-stat" data-earn-stat="staking-paid">
-        <div class="val" data-val>$0.00</div>
-        <div class="lbl">Reward paid out (completed)</div>
-      </div>
-      <div class="widget earn-stat" data-earn-stat="staking-count" style="grid-column: span 2;">
-        <div class="val" data-val>0</div>
-        <div class="lbl">Active stakes</div>
-      </div>
+      <div class="widget earn-stat" data-earn-stat="staking-active"><div class="val" data-val>$0.00</div><div class="lbl">Rewards accruing (active stakes)</div></div>
+      <div class="widget earn-stat" data-earn-stat="staking-paid"><div class="val" data-val>$0.00</div><div class="lbl">Rewards paid out (completed)</div></div>
+      <div class="widget earn-stat" data-earn-stat="staking-principal"><div class="val" data-val>$0.00</div><div class="lbl">Currently staked</div></div>
+      <div class="widget earn-stat" data-earn-stat="staking-count"><div class="val" data-val>0</div><div class="lbl">Active stakes</div></div>
     </div>
 
     <!-- NFT -->
-    <div class="earn-section-label">NFT collection <a href="https://swap-opb6.vercel.app/" class="btn-wallet" style="margin-left:auto;">Connect Wallet</a></div>
+    <div class="earn-section-label">NFT collection <a href="nft-marketplace.html" class="btn-wallet" style="margin-left:auto;">Open NFT market</a></div>
     <div class="earn-grid">
-      <div class="widget earn-stat" data-earn-stat="nft-owned">
-        <div class="val" data-val>0</div>
-        <div class="lbl">NFTs owned</div>
-      </div>
-      <div class="widget earn-stat" data-earn-stat="nft-spend">
-        <div class="val" data-val>$0.00</div>
-        <div class="lbl">Total minted value</div>
-      </div>
-      <div class="widget" style="grid-column: span 2;">
-        <div class="lbl" style="font-size:.76rem;color:var(--muted);padding:6px 2px;">NFTs currently have no resale or price-appreciation mechanic in this build, so there's no realized profit to show — this is spend/collection value only.</div>
-      </div>
+      <div class="widget earn-stat" data-earn-stat="nft-owned"><div class="val" data-val>0</div><div class="lbl">NFTs owned</div></div>
+      <div class="widget earn-stat" data-earn-stat="nft-cost"><div class="val" data-val>$0.00</div><div class="lbl">Cost when minted</div></div>
+      <div class="widget earn-stat" data-earn-stat="nft-value"><div class="val" data-val>$0.00</div><div class="lbl">Worth now</div></div>
+      <div class="widget earn-stat" data-earn-stat="nft-pnl"><div class="val" data-val>$0.00</div><div class="lbl">NFT earnings</div></div>
     </div>
 
     <!-- Combined activity -->
     <div class="widget">
       <div class="widget-head">
         <h3>Combined activity</h3>
-        <span class="pill pill-neutral" style="font-size:.68rem;">Entries are tagged — never summed together</span>
+        <a href="trading-history.html" class="btn btn-ghost btn-sm">Full history</a>
       </div>
       <table class="data-table">
-        <thead><tr><th>Date</th><th>Source</th><th>Detail</th><th>Amount</th></tr></thead>
+        <thead><tr><th>Date &amp; time</th><th>Source</th><th>Detail</th><th>Earned</th></tr></thead>
         <tbody data-earn-table><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">No activity yet.</td></tr></tbody>
       </table>
     </div>
@@ -196,8 +168,91 @@
 <script src="../assets/js/firebase-init.js"></script>
 <script src="../assets/js/auth-guard.js"></script>
 <script src="../assets/js/dashboard.js"></script>
-<script src="../assets/js/earnings.js"></script>
+<script src="../assets/js/demo-ledger.js"></script>
+<script src="../assets/js/wallet-card.js"></script>
+<script src="../assets/js/vaultex-earnings.js"></script>
 <script src="../assets/js/total-balance.js"></script>
 <script src="../assets/js/notifications.js"></script>
+<script>
+(function(){
+  'use strict';
+  const VE = window.VaultexEarnings, V = window.VaultexDemo;
+  const money = VE.money;
+  const $s = k => document.querySelector('[data-earn-stat="'+k+'"]');
+  function set(k, text, cls, sub){
+    const el = $s(k); if(!el) return;
+    const v = el.querySelector('[data-val]'); v.textContent = text;
+    v.classList.remove('pos','neg'); if(cls) v.classList.add(cls);
+    const s = el.querySelector('[data-sub]'); if(s && sub != null) s.textContent = sub;
+  }
+  const sign = n => (n > 0.004 ? '+' : '') + money(n);
+  const cls = n => n > 0.004 ? 'pos' : (n < -0.004 ? 'neg' : '');
+  const dt = ts => new Date(ts).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit'});
+  const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  let CARD = null, WALLET = [];
+  function drawChart(series){
+    const cv = document.getElementById('pnlChart'); if(!cv) return;
+    const empty = document.querySelector('[data-trading-empty]');
+    const w = cv.clientWidth || 600, h = 100, r = window.devicePixelRatio || 1;
+    cv.width = w*r; cv.height = h*r; const g = cv.getContext('2d'); g.scale(r,r); g.clearRect(0,0,w,h);
+    if(empty) empty.style.display = series.length ? 'none' : '';
+    if(!series.length) return;
+    const pts = [{ts:series[0].ts-1,cum:0}].concat(series);
+    const min = Math.min(0,...pts.map(p=>p.cum)), max = Math.max(0,...pts.map(p=>p.cum)), span = (max-min)||1;
+    const x = i => 6 + i*(w-12)/Math.max(1,pts.length-1), y = v => h-8-(v-min)/span*(h-16);
+    g.strokeStyle='rgba(137,147,171,.35)'; g.setLineDash([4,4]); g.beginPath(); g.moveTo(0,y(0)); g.lineTo(w,y(0)); g.stroke(); g.setLineDash([]);
+    const up = pts[pts.length-1].cum >= 0;
+    g.strokeStyle = up ? '#00D9A3' : '#FF5C72'; g.lineWidth = 2; g.beginPath();
+    pts.forEach((p,i)=> i ? g.lineTo(x(i),y(p.cum)) : g.moveTo(x(i),y(p.cum))); g.stroke();
+  }
+
+  function render(){
+    const c = VE.compute();
+    const tot = $s ? document.querySelector('[data-earnings-total]') : null;
+    if(tot){ tot.textContent = sign(c.total); tot.style.color = c.total < -0.004 ? 'var(--coral,#ff5c72)' : ''; }
+    set('earn-trading', sign(c.trading.total), cls(c.trading.total), c.trading.closed + ' closed trade' + (c.trading.closed===1?'':'s'));
+    set('earn-bot', sign(c.bot.total), cls(c.bot.total), c.bot.active ? 'Bot running' : 'Bot idle');
+    set('earn-staking', sign(c.staking.total), cls(c.staking.total), c.staking.active + ' active stake' + (c.staking.active===1?'':'s'));
+    set('earn-nft', sign(c.nft.total), cls(c.nft.total), c.nft.owned + ' NFT' + (c.nft.owned===1?'':'s') + ' owned');
+    set('all-time', sign(c.trading.total), cls(c.trading.total));
+    set('week', sign(c.trading.week), cls(c.trading.week));
+    set('bot-total', sign(c.bot.total), cls(c.bot.total));
+    set('bot-session', sign(c.bot.session), cls(c.bot.session));
+    set('bot-rate', c.bot.rate ? c.bot.rate.toFixed(2)+'%' : '—');
+    set('bot-status', c.bot.active ? 'Running · ' + (c.bot.pkg||'') : 'Idle');
+    set('staking-active', sign(c.staking.accruing), cls(c.staking.accruing));
+    set('staking-paid', sign(c.staking.paid), cls(c.staking.paid));
+    set('staking-principal', money(c.staking.principal));
+    set('staking-count', String(c.staking.active));
+    set('nft-owned', String(c.nft.owned));
+    set('nft-cost', money(c.nft.cost));
+    set('nft-value', money(c.nft.value));
+    set('nft-pnl', sign(c.nft.total), cls(c.nft.total));
+    drawChart(c.trading.series);
+    if(CARD) CARD.update({ coins: WALLET, stakedUsd: c.staking.principal + c.staking.accruing });
+
+    // Combined activity: only entries that earned (or lost) something, newest first
+    const rows = VE.events().filter(e => e.pnl != null && Math.abs(e.pnl) > 0).slice(0, 100);
+    const tb = document.querySelector('[data-earn-table]');
+    tb.innerHTML = rows.length ? rows.map(e => `<tr>
+      <td>${dt(e.ts)}</td>
+      <td><span class="earn-src ${e.source}">${e.source}</span></td>
+      <td>${esc(e.asset)} · ${esc(e.action)}${e.status ? ' <span style="color:var(--muted);font-size:.74rem">· '+esc(e.status)+'</span>' : ''}</td>
+      <td class="mono ${e.pnl>=0?'pnl-pos':'pnl-neg'}">${sign(e.pnl)}</td></tr>`).join('')
+      : '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">No earnings yet.</td></tr>';
+  }
+
+  if(window.VaultexWalletCard) CARD = VaultexWalletCard.mount(document.getElementById('walletCard'));
+  render();
+  VE.ensurePrices().then(render);
+  setInterval(render, 2000);
+  setInterval(()=>VE.ensurePrices().then(render), 60000);
+  window.addEventListener('storage', render);
+  window.addEventListener('resize', render);
+  window.addEventListener('vaultex:deposit-finished', render);
+  if(V) V.whenUser(u => V.onWallet(u.uid, w => { WALLET = w.coins || []; render(); }));
+})();
+</script>
 </body>
 </html>
