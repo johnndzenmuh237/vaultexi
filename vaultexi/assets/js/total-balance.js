@@ -76,6 +76,7 @@
   }
 
   function earningsTotal() {
+    if (window.VaultexEarnings) return VaultexEarnings.compute().total;   // trading + bot + staking + NFT
     let total = botLifetime();
     read(LS_STAKE_HIST, []).forEach(h => {
       const p = prices[String(h.symbol || '').toLowerCase()];
@@ -110,7 +111,7 @@
       note.style.cssText = 'font-size:.74rem;color:var(--muted);margin:2px 0 10px;';
       el.insertAdjacentElement('afterend', note);
     }
-    note.textContent = Math.abs(earn) >= 0.005 ? 'Includes ' + money(earn) + ' from VaultexBotTrade and staking earnings' : '';
+    note.textContent = Math.abs(earn) >= 0.005 ? 'Includes ' + money(earn) + ' from trading, AutoTrading, staking and NFT earnings' : '';
   }
 
   new MutationObserver(() => {
