@@ -9,6 +9,28 @@
 <link rel="stylesheet" href="../assets/css/style.css">
 <link rel="stylesheet" href="../assets/css/dashboard.css">
 <link rel="stylesheet" href="../assets/css/responsive.css">
+<style>
+.th-filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
+.th-chip{padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--ink-soft,transparent);color:var(--muted);font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit}
+.th-chip.active{background:var(--mint);border-color:var(--mint);color:#03140F}
+.th-chip small{font-family:var(--font-mono);opacity:.75;margin-left:5px}
+.th-tools{margin-left:auto;display:flex;gap:8px;align-items:center}
+.th-search{background:var(--ink-soft,transparent);border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:7px 12px;font-size:.82rem;font-family:inherit;min-width:160px}
+.th-sum{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.th-sum .widget{padding:14px 16px}
+.th-sum .v{font-family:var(--font-mono);font-weight:700;font-size:1.25rem}
+.th-sum .l{font-size:.72rem;color:var(--muted);margin-top:2px}
+.earn-src{display:inline-block;font-size:.63rem;padding:2px 7px;border-radius:4px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+.earn-src.Trading{background:rgba(108,124,255,.15);color:#8e9bff}.earn-src.AutoTrading{background:rgba(0,229,255,.12);color:#00E5FF}.earn-src.Staking{background:rgba(60,220,150,.12);color:var(--mint)}.earn-src.NFT{background:rgba(192,132,252,.15);color:#c084fc}
+.side-buy,.side-long,.side-stake,.side-mint{color:var(--mint);font-weight:700}
+.side-sell,.side-short,.side-unstake{color:var(--coral,#ff5c72);font-weight:700}
+.pnl-pos{color:var(--mint)}.pnl-neg{color:var(--coral,#ff5c72)}
+.th-date{white-space:nowrap}.th-date small{display:block;color:var(--muted);font-family:var(--font-mono);font-size:.72rem}
+.th-status{font-size:.68rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);font-family:var(--font-mono)}
+.th-more{display:block;margin:16px auto 0}
+.th-scroll{overflow-x:auto}
+@media (max-width:900px){.th-sum{grid-template-columns:repeat(2,minmax(0,1fr))}.th-tools{margin-left:0;width:100%}.th-search{flex:1}}
+</style>
 </head>
 <body>
 
@@ -25,7 +47,7 @@
       <div>
         <button class="sidebar-burger" data-sidebar-toggle aria-label="Toggle menu"><span></span><span></span><span></span></button>
         <h2 class="mb-0" style="font-size:1.5rem;">Trading history</h2>
-        <p class="mb-0" style="font-size:.88rem;">Every order you have placed, filled or cancelled.</p>
+        <p class="mb-0" style="font-size:.88rem;">Every trade, bot trade, stake and NFT mint you have made, with date and time.</p>
       </div>
       <div class="flex" style="gap:14px;">
         <button class="theme-toggle" aria-label="Toggle theme">☾</button>
@@ -34,16 +56,42 @@
       </div>
     </div>
 
-    <div class="widget">
+    <div class="th-sum">
+      <div class="widget"><div class="v" id="sumCount">0</div><div class="l">Total activity</div></div>
+      <div class="widget"><div class="v" id="sumTrades">0</div><div class="l">Trades &amp; bot trades</div></div>
+      <div class="widget"><div class="v" id="sumPnl">$0.00</div><div class="l">Profit / loss in this view</div></div>
+      <div class="widget"><div class="v" id="sumLast">—</div><div class="l">Last activity</div></div>
+    </div>
+
+    <div class="th-filters" id="thFilters">
+      <button class="th-chip active" data-f="All">All <small>0</small></button>
+      <button class="th-chip" data-f="Trading">Trading <small>0</small></button>
+      <button class="th-chip" data-f="AutoTrading">AutoTrading <small>0</small></button>
+      <button class="th-chip" data-f="Staking">Staking <small>0</small></button>
+      <button class="th-chip" data-f="NFT">NFT <small>0</small></button>
+      <div class="th-tools">
+        <input class="th-search" id="thSearch" placeholder="Search pair, item, status…" type="search">
+        <button class="btn btn-ghost btn-sm" id="thCsv">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="widget th-scroll">
       <table class="data-table">
-        <thead><tr><th>Date</th><th>Pair</th><th>Side</th><th>Price</th><th>Amount</th><th>Status</th></tr></thead>
+        <thead><tr><th>Date &amp; time</th><th>Source</th><th>Pair / Item</th><th>Side</th><th>Price</th><th>Amount</th><th>Total / P&amp;L</th><th>Status</th></tr></thead>
         <tbody data-trade-history-table>
-          <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">No trades placed yet. Once trading is live, your order history will appear here.</td></tr>
+          <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px;">No activity yet. Trades, bot trades, stakes and NFT mints will appear here.</td></tr>
         </tbody>
       </table>
     </div>
+    <button class="btn btn-ghost th-more" id="thMore" style="display:none">Load more</button>
   </main>
 </div>
+
+<div id="notif-panel" class="widget" style="position:fixed;top:70px;right:24px;width:340px;z-index:300;display:none;box-shadow:var(--shadow-card);">
+  <div class="widget-head"><h3>Notifications</h3></div>
+  <div data-notif-list></div>
+</div>
+<style>#notif-panel.open{display:block;}</style>
 
 <script src="../assets/js/main.js"></script>
 <script src="../assets/js/charts.js"></script>
@@ -53,5 +101,65 @@
 <script src="../assets/js/firebase-init.js"></script>
 <script src="../assets/js/auth-guard.js"></script>
 <script src="../assets/js/dash-shell.js"></script>
+<script src="../assets/js/demo-ledger.js"></script>
+<script src="../assets/js/vaultex-earnings.js"></script>
+<script src="../assets/js/notifications.js"></script>
+<script>
+(function(){
+  'use strict';
+  const VE = window.VaultexEarnings, money = VE.money;
+  const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const PAGE = 50;
+  let filter = 'All', q = '', shown = PAGE, ALL = [];
+  const fmtPrice = p => p == null ? '—' : '$' + Number(p).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits: p < 1 ? 6 : 2});
+  const dateCell = ts => { const d = new Date(ts); return '<td class="th-date">' + d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + '<small>' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',second:'2-digit'}) + '</small></td>'; };
+  function view(){
+    return ALL.filter(e => (filter === 'All' || e.source === filter) &&
+      (!q || (e.asset + ' ' + e.action + ' ' + e.status + ' ' + e.source + ' ' + (e.detail||'')).toLowerCase().includes(q)));
+  }
+  function render(){
+    ALL = VE.events();
+    const list = view();
+    document.querySelectorAll('#thFilters .th-chip').forEach(b => {
+      const f = b.dataset.f; b.classList.toggle('active', f === filter);
+      b.querySelector('small').textContent = f === 'All' ? ALL.length : ALL.filter(e => e.source === f).length;
+    });
+    document.getElementById('sumCount').textContent = list.length;
+    document.getElementById('sumTrades').textContent = list.filter(e => e.source === 'Trading' || e.source === 'AutoTrading').length;
+    const pnl = list.reduce((s,e) => s + (e.pnl || 0), 0);
+    const pe = document.getElementById('sumPnl'); pe.textContent = (pnl > 0.004 ? '+' : '') + money(pnl); pe.className = 'v ' + (pnl > 0.004 ? 'pnl-pos' : pnl < -0.004 ? 'pnl-neg' : '');
+    document.getElementById('sumLast').textContent = list.length ? new Date(list[0].ts).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '—';
+    const tb = document.querySelector('[data-trade-history-table]');
+    if(!list.length){
+      tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px;">' + (ALL.length ? 'Nothing matches this filter.' : 'No activity yet. Trades, bot trades, stakes and NFT mints will appear here.') + '</td></tr>';
+    } else {
+      tb.innerHTML = list.slice(0, shown).map(e => `<tr>${dateCell(e.ts)}
+        <td><span class="earn-src ${e.source}">${e.source}</span></td>
+        <td>${esc(e.asset)}${e.detail ? '<div style="color:var(--muted);font-size:.72rem">'+esc(e.detail)+'</div>' : ''}</td>
+        <td class="side-${e.action.toLowerCase().replace(/\s+/g,'-')}">${esc(e.action)}</td>
+        <td class="mono">${fmtPrice(e.price)}</td>
+        <td class="mono">${esc(e.amountText)}</td>
+        <td class="mono ${e.pnl != null ? (e.pnl >= 0 ? 'pnl-pos' : 'pnl-neg') : ''}">${e.pnl != null ? (e.pnl > 0.004 ? '+' : '') + money(e.pnl) : (e.valueUsd != null ? money(e.valueUsd) : '—')}</td>
+        <td><span class="th-status">${esc(e.status)}</span></td></tr>`).join('');
+    }
+    document.getElementById('thMore').style.display = list.length > shown ? '' : 'none';
+  }
+  document.getElementById('thFilters').addEventListener('click', e => { const b = e.target.closest('.th-chip'); if(!b) return; filter = b.dataset.f; shown = PAGE; render(); });
+  document.getElementById('thSearch').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); shown = PAGE; render(); });
+  document.getElementById('thMore').addEventListener('click', () => { shown += PAGE; render(); });
+  document.getElementById('thCsv').addEventListener('click', () => {
+    const rows = [['Date','Time','Source','Pair/Item','Side','Price','Amount','Value USD','PnL USD','Status']].concat(view().map(e => {
+      const d = new Date(e.ts); return [d.toLocaleDateString('en-US'), d.toLocaleTimeString('en-US'), e.source, e.asset, e.action, e.price ?? '', e.amountText, e.valueUsd ?? '', e.pnl ?? '', e.status]; }));
+    const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download = 'vaultex-history.csv'; a.click();
+  });
+  render();
+  VE.ensurePrices().then(render);
+  setInterval(render, 3000);
+  window.addEventListener('storage', render);
+  window.addEventListener('vaultex:deposit-finished', render);
+  document.addEventListener('visibilitychange', () => { if(!document.hidden) render(); });
+})();
+</script>
 </body>
 </html>
