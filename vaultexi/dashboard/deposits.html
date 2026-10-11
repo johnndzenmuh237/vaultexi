@@ -9,6 +9,16 @@
 <link rel="stylesheet" href="../assets/css/style.css">
 <link rel="stylesheet" href="../assets/css/dashboard.css">
 <link rel="stylesheet" href="../assets/css/responsive.css">
+<style>
+/* history tables: keep every cell on one line, scroll sideways on small screens */
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tbl-scroll .data-table{display:table!important;width:100%;min-width:680px}
+.tbl-scroll .data-table thead{display:table-header-group!important}
+.tbl-scroll .data-table tbody{display:table-row-group!important}
+.tbl-scroll .data-table tr{display:table-row!important}
+.tbl-scroll .data-table th,.tbl-scroll .data-table td{display:table-cell!important;white-space:nowrap;writing-mode:horizontal-tb;word-break:normal;overflow-wrap:normal;vertical-align:middle}
+.tbl-scroll .data-table td[colspan]{white-space:normal}
+</style>
 </head>
 <body>
 <div class="dash-shell">
@@ -29,7 +39,6 @@
         <button class="btn btn-ghost btn-sm" data-logout>Log out</button>
       </div>
     </div>
-    <div class="security-row" style="border-color:#F5A623;margin-bottom:18px;"><div><strong style="color:#F5A623;">Demo mode</strong><p class="mb-0" style="font-size:.85rem;">Test deposits only. No real money moves and no payment provider is used. Daily limit: $50,000,000.</p></div></div>
 
     <div class="dash-grid-2">
       <div class="widget">
@@ -79,10 +88,10 @@
     <div class="widget" style="margin-top:24px;">
       <div class="widget-head"><h3>Recent deposits</h3></div>
       <div style="overflow-x:auto;">
-        <table class="data-table">
+        <div class="tbl-scroll"><table class="data-table">
           <thead><tr><th>Date</th><th>Asset</th><th>Amount</th><th>Status</th><th>Hash</th></tr></thead>
           <tbody id="history-body"><tr><td colspan="5">You haven't made a deposit yet.</td></tr></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -100,9 +109,8 @@
 <script src="../assets/js/firebase-init.js"></script>
 <script src="../assets/js/auth-guard.js"></script>
 <script src="../assets/js/dash-shell.js"></script>
-<script src="../assets/js/demo-store.js"></script>   <!-- optional -->
-<script src="../assets/js/demo-ledger.js"></script>
 <script src="../assets/js/notifications.js"></script>
+<script src="../assets/js/demo-ledger.js"></script>
 <script src="../assets/js/deposit.js"></script>
 </body>
 </html>
