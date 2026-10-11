@@ -1,5 +1,5 @@
 /* =========================================================
-   WITHDRAWAL.JS — DEMO withdrawal flow (no admin review, no backend).
+   WITHDRAWAL.JS — Withdrawal flow (no admin review, no backend).
    Script order on withdrawals.html:
      firebase-* -> firebase-init.js -> auth-guard.js -> demo-ledger.js -> withdrawal.js
    ========================================================= */
