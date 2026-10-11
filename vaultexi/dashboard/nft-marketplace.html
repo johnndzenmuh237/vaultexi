@@ -213,7 +213,7 @@
 
 <div class="wallet-strip">
   <div class="container">
-    <div class="w-stat" id="usdtBalStat" style="display:none;"><span class="lbl">ETH balance</span><span class="val" id="usdtBal">0.00 ETH</span></div>
+    <div class="w-stat" id="usdtBalStat"><span class="lbl">ETH balance</span><span class="val" id="usdtBal">0.00 ETH</span></div>
     <div class="w-stat"><span class="lbl">NFTs owned</span><span class="val" id="ownedCountVal">0</span></div>
     <div class="w-stat"><span class="lbl">Collection value (est.)</span><span class="val" id="collectionValVal">0.00 ETH</span></div>
   </div>
@@ -225,6 +225,11 @@
     <h1>Mint, collect, and trade — zero-gas listing.</h1>
     <p style="margin:0 auto;">List your collectibles for free on select networks, and pay no platform fee on your first sale each month.</p>
   </div>
+</section>
+
+<section class="section-sm" style="padding-bottom:0">
+  <div class="container"><div id="walletCard"></div>
+    <div id="ethHint" style="display:none;margin-top:12px;font-size:.84rem;color:var(--muted)"></div></div>
 </section>
 
 <section class="section-sm">
@@ -285,6 +290,8 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="../assets/js/firebase-init.js"></script>
+<script src="../assets/js/demo-ledger.js"></script>
+<script src="../assets/js/wallet-card.js"></script>
 
 <script>
 (function(){
@@ -293,79 +300,31 @@
   const fmtETH = n => (n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' ETH';
 
   /* =========================================================
-     LOCAL WALLET + COLLECTION — isolated on purpose.
-     Keys are prefixed "vaultex_nft_" and are entirely
-     separate from the real custody balance served by
-     /api/account/summary, from production wallet keys, and
-     from the staking/AutoTrading local pools on the other pages
-     (each of those has its own independently-namespaced local
-     balance). This page never reads or writes anything to the
-     real account balance, Firestore trade/withdrawal data, or
-     any real blockchain. The only thing read from the real
-     account is totalBalance, used purely to size the local ETH
-     balance below — see syncBalanceWithDeposits().
+     WALLET — NFTs are bought with ETH from the same simulated wallet
+     used by Deposits, Assets, Trading, Staking and AutoTrading
+     (VaultexDemo, demo-ledger.js). Minting spends wallet ETH; the
+     collection and activity are kept in this browser.
   ========================================================= */
-  const LS_BAL     = 'vaultex_nft_balance_eth';
-  const LS_OWNED   = 'vaultex_nft_owned';
-  const LS_HIST    = 'vaultex_nft_history';
+  const LS_OWNED   = 'vaultex_demo_nft_owned';
+  const LS_HIST    = 'vaultex_demo_nft_history';
+  const V = window.VaultexDemo;
+  let UID = null, READY = false, CARD = null;
+  let WALLET_COINS = [];
+  let ETH_USD = 0;
 
-  function getBalance(){ return parseFloat(localStorage.getItem(LS_BAL)||'0'); }
-  function setBalance(v){ localStorage.setItem(LS_BAL, String(Math.max(0,v))); }
+  function getBalance(){
+    if(!V || !UID) return 0;
+    return Number(V.getCoins(UID).ETH) || 0;
+  }
+  function spendEth(amount){
+    const map = V.getCoins(UID);
+    map.ETH = Math.max(0, (Number(map.ETH)||0) - amount);
+    V.setCoins(UID, map);
+  }
   function getOwned(){ try{ return JSON.parse(localStorage.getItem(LS_OWNED)||'[]'); }catch(e){ return []; } }
   function setOwned(o){ localStorage.setItem(LS_OWNED, JSON.stringify(o)); }
   function getHistory(){ try{ return JSON.parse(localStorage.getItem(LS_HIST)||'[]'); }catch(e){ return []; } }
   function setHistory(h){ localStorage.setItem(LS_HIST, JSON.stringify(h.slice(0,50))); }
-
-  /* ---------------------------------------------------------
-     "Connect wallet" is a plain nav link to dashboard.html
-     (real Vaultex login), not a local wallet toggle. Minting
-     is gated on being logged in to a real Vaultex account
-     (auth.currentUser) instead — see renderGrid() below.
-  --------------------------------------------------------- */
-
-  /* ---------------------------------------------------------
-     SYNC ETH BALANCE WITH REAL DEPOSITS
-     ---------------------------------------------------------
-     Same pattern as trade.html / staking.html: on auth and on
-     tab refocus, check /api/account/summary for the real
-     balance. If it's higher than the last time we checked (a
-     deposit), add that exact delta to the local NFT
-     balance. Real balance decreases (withdrawals) are never
-     synced in. This key is namespaced separately from the other
-     pages' trackers so each pool receives its own
-     independent top-up off the same real deposit.
-  --------------------------------------------------------- */
-  const LS_REAL_SEEN = uid => `vaultex_nft_real_balance_seen_${uid}`;
-
-  async function syncBalanceWithDeposits(uid){
-    if(!uid || !window.auth || !auth.currentUser) return;
-    try{
-      const token = await auth.currentUser.getIdToken();
-      const res = await fetch('/api/account/summary', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if(!res.ok) return;
-      const data = await res.json();
-      if(!data.success || typeof data.totalBalance !== 'number') return;
-
-      const key = LS_REAL_SEEN(uid);
-      const lastSeenRaw = localStorage.getItem(key);
-      const lastSeen = lastSeenRaw === null ? NaN : parseFloat(lastSeenRaw);
-      const realBal = data.totalBalance;
-
-      if(isNaN(lastSeen)){
-        setBalance(realBal);
-      } else if(realBal > lastSeen){
-        setBalance(getBalance() + (realBal - lastSeen));
-      }
-
-      localStorage.setItem(key, realBal.toString());
-    }catch(e){
-      console.error('Failed to sync NFT balance with real deposits', e);
-    }finally{
-      renderAll();
-    }
-  }
 
   /* ===== generated placeholder art =====
      Used as automatic fallback artwork — no external image
@@ -524,7 +483,6 @@
     $('usdtBal').textContent = fmtETH(bal);
     // Same convention as staking.html: hide the balance stat until a
     // real deposit has synced something nonzero in.
-    $('usdtBalStat').style.display = bal > 0 ? '' : 'none';
 
     const owned = getOwned();
     $('ownedCountVal').textContent = owned.length;
@@ -534,6 +492,13 @@
       return sum + (item ? item.priceEth : 0);
     }, 0);
     $('collectionValVal').textContent = fmtETH(collectionVal);
+    if(CARD) CARD.update({ coins: WALLET_COINS, extras: [{ label:'NFTs', usd: collectionVal*ETH_USD, color:'#c084fc' }] });
+    const hint = $('ethHint');
+    const cheapest = Math.min(...NFTS.filter(n=>!owned.includes(n.id)).map(n=>n.priceEth), Infinity);
+    if(READY && cheapest !== Infinity && bal + 1e-9 < cheapest){
+      hint.style.display = '';
+      hint.innerHTML = 'NFTs are bought with ETH. Your wallet has '+fmtETH(bal)+' — <a href="trading.html?coin=ETH" style="color:var(--mint);font-weight:600">buy ETH on the Trading page</a> or deposit ETH.';
+    } else hint.style.display = 'none';
   }
 
   /* ===== render: grid ===== */
@@ -543,12 +508,14 @@
     $('nftGrid').innerHTML = NFTS.map(item=>{
       const isOwned = owned.includes(item.id);
       const bal = getBalance();
-      const affordable = bal >= item.priceEth;
+      const affordable = bal + 1e-9 >= item.priceEth;
       let btnHtml;
-      if(isOwned){
+      if(!READY){
+        btnHtml = `<button class="btn btn-ghost btn-block nft-mint-btn" disabled>Loading wallet…</button>`;
+      } else if(isOwned){
         btnHtml = `<button class="btn btn-ghost btn-block nft-mint-btn" disabled>Owned</button>`;
       } else if(!affordable){
-        btnHtml = `<button class="btn btn-ghost btn-block nft-mint-btn" disabled>Insufficient balance</button>`;
+        btnHtml = `<button class="btn btn-ghost btn-block nft-mint-btn" disabled>Need more ETH</button>`;
       } else {
         btnHtml = `<button class="btn btn-primary btn-block nft-mint-btn" data-mint="${item.id}">Mint</button>`;
       }
@@ -566,7 +533,7 @@
           <div class="nft-price-row">
             <div>
               <div class="nft-price">${item.priceEth.toFixed(2)}</div>
-              <div class="nft-price-usd">ETH</div>
+              <div class="nft-price-usd">ETH${ETH_USD ? ' · ≈ $'+(item.priceEth*ETH_USD).toLocaleString('en-US',{maximumFractionDigits:0}) : ''}</div>
             </div>
           </div>
           ${btnHtml}
@@ -585,14 +552,15 @@
     const owned = getOwned();
     if(owned.includes(id)) return;
     const bal = getBalance();
-    if(bal < item.priceEth) return;
+    if(bal + 1e-9 < item.priceEth) return;
 
-    setBalance(bal - item.priceEth);
+    if(!UID || !READY) return;
+    spendEth(item.priceEth);
     owned.push(id);
     setOwned(owned);
 
     const hist = getHistory();
-    hist.unshift({ id: item.id, name: item.name, collection: item.collection, priceEth: item.priceEth, ts: Date.now() });
+    hist.unshift({ id: item.id, name: item.name, collection: item.collection, priceEth: item.priceEth, ethUsd: ETH_USD, ts: Date.now() });
     setHistory(hist);
 
     renderAll();
@@ -658,17 +626,17 @@
   }
 
   /* ===== init ===== */
+  if(window.VaultexWalletCard) CARD = VaultexWalletCard.mount($('walletCard'));
   renderAll();
 
-  document.addEventListener('visibilitychange', () => {
-    if(!document.hidden && window.auth && auth.currentUser){
-      syncBalanceWithDeposits(auth.currentUser.uid);
-    }
-  });
+  window.addEventListener('vaultex:deposit-finished', renderAll);   // wallet changed (trade, deposit, other tab)
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) renderAll(); });
 
-  if(window.auth){
-    auth.onAuthStateChanged((user) => {
-      if(user) syncBalanceWithDeposits(user.uid);
+  if(V){
+    V.whenUser(user=>{
+      UID = user.uid;
+      V.getPrice('ETH').then(p=>{ ETH_USD = Number(p)||0; renderAll(); }).catch(()=>{});
+      V.onWallet(UID, w=>{ WALLET_COINS = w.coins||[]; const e = WALLET_COINS.find(c=>c.base==='ETH'); if(e && e.price) ETH_USD = e.price; READY = true; renderAll(); });
     });
   }
 })();
