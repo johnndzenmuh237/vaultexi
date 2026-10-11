@@ -9,6 +9,16 @@
 <link rel="stylesheet" href="../assets/css/style.css">
 <link rel="stylesheet" href="../assets/css/dashboard.css">
 <link rel="stylesheet" href="../assets/css/responsive.css">
+<style>
+/* history tables: keep every cell on one line, scroll sideways on small screens */
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tbl-scroll .data-table{display:table!important;width:100%;min-width:680px}
+.tbl-scroll .data-table thead{display:table-header-group!important}
+.tbl-scroll .data-table tbody{display:table-row-group!important}
+.tbl-scroll .data-table tr{display:table-row!important}
+.tbl-scroll .data-table th,.tbl-scroll .data-table td{display:table-cell!important;white-space:nowrap;writing-mode:horizontal-tb;word-break:normal;overflow-wrap:normal;vertical-align:middle}
+.tbl-scroll .data-table td[colspan]{white-space:normal}
+</style>
 </head>
 <body>
 
@@ -55,7 +65,7 @@
           <button>Trades</button>
         </div>
       </div>
-      <div style="overflow-x:auto;">
+      <div class="tbl-scroll">
         <table class="data-table">
           <thead><tr><th>Date &amp; time</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead>
           <tbody data-tx-table>
@@ -81,7 +91,6 @@
 <script src="../assets/js/auth-guard.js"></script>
 <script src="../assets/js/dash-shell.js"></script>
 <script src="../assets/js/demo-ledger.js"></script>
-<!-- <script src="../assets/js/demo-store.js"></script>  (uncomment/adjust if your DemoStore file lives here) -->
 <script src="../assets/js/notifications.js"></script>
 <script src="../assets/js/transactions-page.js"></script>
 </body>
