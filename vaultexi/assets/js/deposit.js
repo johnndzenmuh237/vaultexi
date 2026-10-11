@@ -1,5 +1,5 @@
 /* =========================================================
-   DEPOSIT.JS — DEMO deposit flow (no NOWPayments, no backend).
+   DEPOSIT.JS — Deposit flow (no NOWPayments, no backend).
    Script order on deposits.html:
      firebase-* -> firebase-init.js -> auth-guard.js -> demo-ledger.js -> deposit.js
    ========================================================= */
