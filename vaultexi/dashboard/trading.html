@@ -247,7 +247,7 @@
   function getBotLog() { try { return JSON.parse(localStorage.getItem(LS_BOT_LOG) || '[]'); } catch(e){ return []; } }
   function setBotLog(arr) { localStorage.setItem(LS_BOT_LOG, JSON.stringify(arr.slice(0, 40))); }
   function getBotTx() { try { return JSON.parse(localStorage.getItem(LS_BOT_TX) || '[]'); } catch(e){ return []; } }
-  function setBotTx(arr) { localStorage.setItem(LS_BOT_TX, JSON.stringify(arr.slice(0, 80))); }
+  function setBotTx(arr) { localStorage.setItem(LS_BOT_TX, JSON.stringify(arr.slice(0, 3000))); }
   
 
   /* ============== ALL-TIME EARNINGS COUNTER ==============
@@ -327,7 +327,7 @@
     el.classList.toggle('zero', bal <= 0);
     $('zeroBalWarn').style.display = (READY && bal <= 0) ? '' : 'none';
     const held = W.coins.filter(c => c.qty * c.price >= 0.01).sort((a, b) => b.qty * b.price - a.qty * a.price).slice(0, 6);
-    if (CARD) CARD.update({ coins: W.coins, sub: READY ? (W.coins.length ? 'Available to the bot · live market prices' : 'No assets yet — deposit a coin to get started') : 'Loading your wallet…' });
+    if (CARD) CARD.update({ coins: W.coins, extras: [], sub: READY ? (W.coins.length ? 'Available to the bot · live market prices' : 'No assets yet — deposit a coin to get started') : 'Loading your wallet…' });
     $('availSub').textContent = !READY ? 'Loading your wallet…' : (held.length
       ? 'Wallet: ' + held.map(c => c.base + ' ' + (c.base === 'USDT' ? fmtMoney(c.qty).slice(1) : c.qty.toLocaleString('en-US', { maximumFractionDigits: 6 }))).join(' · ')
       : '');
