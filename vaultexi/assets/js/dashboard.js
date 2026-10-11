@@ -215,7 +215,7 @@
 
   function txLabel(tx) {
     if (tx.label) return tx.label;
-    if (tx.type === 'Trade' && tx.pair) return `${tx.pair} ${tx.side || ''} · Demo`.trim();
+    if (tx.type === 'Trade' && tx.pair) return `${tx.pair} ${tx.side || ''}`.trim();
     return tx.type;
   }
 
