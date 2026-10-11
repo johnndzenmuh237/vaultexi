@@ -209,8 +209,27 @@
 
     const stats = document.querySelectorAll('.quick-stat strong');
     if (stats[0]) stats[0].textContent = `$${deposited30d.toLocaleString()}`;
-    if (stats[1]) stats[1].textContent = `$${staking.toLocaleString()}`;
+    renderStakingStat();
     if (stats[2]) stats[2].textContent = `$${withdrawn30d.toLocaleString()}`;
+  }
+
+  /* Staking rewards = rewards paid out on unstaked positions + rewards accruing on active stakes (USD) */
+  function stakingRewardsUsd() {
+    if (window.VaultexEarnings) return VaultexEarnings.compute().staking.total;
+    const rd = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const pc = (rd('vaultex_demo_staking_price_cache', null) || {}).p || {};
+    const ep = (rd('vaultex_earn_prices', null) || {}).p || {};
+    const px = sym => pc[String(sym).toLowerCase()] || ep[String(sym).toLowerCase()] || 0;
+    let t = 0;
+    rd('vaultex_demo_staking_history', []).forEach(h => { t += (Number(h.reward) || 0) * px(h.symbol); });
+    rd('vaultex_demo_staking_positions', []).forEach(x => {
+      t += (Number(x.amount) || 0) * ((Number(x.apy) || 0) / 100) * ((Date.now() - (x.startedAt || Date.now())) / 31536000000) * px(x.symbol);
+    });
+    return t;
+  }
+  function renderStakingStat() {
+    const stats = document.querySelectorAll('.quick-stat strong');
+    if (stats[1]) stats[1].textContent = '$' + stakingRewardsUsd().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   function txLabel(tx) {
@@ -281,41 +300,44 @@
      (driven by DemoStore trade history; read-only here)
   --------------------------------------------------------- */
 
-  function renderBotWidget(state) {
+  function renderBotWidget() {
     const el = document.querySelector('[data-bot-widget]');
     if (!el) return;
+    const rd = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+    const st = rd('vaultex_bot_state', null);
+    const txs = rd('vaultex_bot_tx', []);
+    const active = !!(st && st.active);
+    let life = parseFloat(localStorage.getItem('vaultex_bot_lifetime_earnings'));
+    if (isNaN(life)) life = txs.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+    const fmtMoney = n => '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtSigned = n => (n >= 0 ? '+' : '−') + fmtMoney(n);
+    const pill = active ? '<span class="pill pill-up">Active</span>' : '<span class="pill pill-neutral">Inactive</span>';
+    const head = `<div class="widget-head"><h3>VaultexBotTrade <span class="demo-chip">VBT</span></h3>${pill}</div>`;
 
-    const botTrades = state.transactions.filter(tx => tx.type === 'Bot');
-
-    if (!botTrades.length) {
-      el.innerHTML = `
-        <div class="widget-head"><h3>VaultexBotTrade <span class="demo-chip">VBT</span></h3><span class="pill pill-neutral">Inactive</span></div>
-        <p style="color:var(--muted);font-size:.85rem;margin:6px 0 14px;">No AutoTrading activity yet. Head to the AutoTrading page to run a simulated session — it uses this same balance.</p>
-        <a href="autotrading.html" class="btn btn-primary btn-sm">Go to AutoTrading</a>
-      `;
+    if (!active && !txs.length) {
+      el.innerHTML = head + `
+        <p style="color:var(--muted);font-size:.85rem;margin:6px 0 14px;">No AutoTrading activity yet. Head to the AutoTrading page and activate a package — it uses your wallet balance.</p>
+        <a href="autotrading.html" class="btn btn-primary btn-sm">Go to AutoTrading</a>`;
       return;
     }
 
-    const totalEarnings = botTrades.reduce((sum, tx) => sum + tx.usdAmount, 0);
-    const fmtMoney = n => '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const fmtSigned = n => (n >= 0 ? '+' : '−') + fmtMoney(n);
-    const recent = botTrades.slice(0, 3);
-
-    el.innerHTML = `
-      <div class="widget-head"><h3>VaultexBotTrade <span class="demo-chip">VBT</span></h3><span class="pill pill-up">Active</span></div>
+    const shown = active ? (Number(st.totalEarnings) || 0) : life;
+    const note = active
+      ? `${st.packageName || 'Bot'} package running · ${(Number(st.dailyRate) || 0).toFixed(2)}% daily target`
+      : 'All-time earnings — bot is not running';
+    const recent = txs.slice(0, 3);
+    el.innerHTML = head + `
       <div style="margin:6px 0 14px;">
-        <div style="font-family:var(--font-mono);font-size:1.3rem;color:${totalEarnings >= 0 ? 'var(--mint)' : 'var(--coral)'};font-weight:700;">${fmtSigned(totalEarnings)}</div>
-        <div style="font-size:.68rem;color:var(--muted);">Simulated session earnings — already reflected in your balance above</div>
+        <div style="font-family:var(--font-mono);font-size:1.3rem;color:${shown >= 0 ? 'var(--mint)' : 'var(--coral)'};font-weight:700;">${fmtSigned(shown)}</div>
+        <div style="font-size:.68rem;color:var(--muted);">${note}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">
         ${recent.map(a => `
           <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:.72rem;color:var(--muted);">
-            <span>${a.label || (a.pair || '') + ' ' + (a.side || '')}</span><span style="color:${a.usdAmount >= 0 ? 'var(--mint)' : 'var(--coral)'}">${fmtSigned(a.usdAmount)}</span>
+            <span>${a.label || 'VaultexBotTrade'}</span><span style="color:${(a.amount || 0) >= 0 ? 'var(--mint)' : 'var(--coral)'}">${fmtSigned(Number(a.amount) || 0)}</span>
           </div>`).join('')}
       </div>
-      <p style="color:var(--muted);font-size:.68rem;margin-bottom:10px;">Simulated demo balance only — no real funds involved.</p>
-      <a href="autotrading.html" class="btn btn-ghost btn-sm">Manage bot</a>
-    `;
+      <a href="autotrading.html" class="btn btn-ghost btn-sm">Manage bot</a>`;
   }
 
   /* ---------------------------------------------------------
@@ -324,12 +346,21 @@
   function refresh() {
     const state = buildState();
     renderAll(state);
-    renderBotWidget(state);
+    renderBotWidget();
   }
 
   if (window.DemoStore && typeof DemoStore.subscribe === 'function') {
     DemoStore.subscribe(refresh);
   }
+
+  /* the bot runs on its own page, so follow its saved state live */
+  renderBotWidget();
+  setInterval(renderBotWidget, 2000);
+  renderStakingStat();
+  setInterval(renderStakingStat, 1000);
+  window.addEventListener('storage', renderStakingStat);
+  window.addEventListener('storage', renderBotWidget);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) renderBotWidget(); });
 
   function startWallet() {
     if (!hasWallet()) return;
