@@ -25,10 +25,17 @@
 .side-buy,.side-long,.side-stake,.side-mint{color:var(--mint);font-weight:700}
 .side-sell,.side-short,.side-unstake{color:var(--coral,#ff5c72);font-weight:700}
 .pnl-pos{color:var(--mint)}.pnl-neg{color:var(--coral,#ff5c72)}
-.th-date{white-space:nowrap}.th-date small{display:block;color:var(--muted);font-family:var(--font-mono);font-size:.72rem}
+.th-date{white-space:nowrap}.th-date small{color:var(--muted);font-family:var(--font-mono);font-size:.72rem}
 .th-status{font-size:.68rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);font-family:var(--font-mono)}
 .th-more{display:block;margin:16px auto 0}
-.th-scroll{overflow-x:auto}
+.th-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.th-scroll .data-table{display:table!important;width:100%;min-width:900px}
+.th-scroll .data-table thead{display:table-header-group!important}
+.th-scroll .data-table tbody{display:table-row-group!important}
+.th-scroll .data-table tr{display:table-row!important}
+.th-scroll .data-table th,.th-scroll .data-table td{display:table-cell!important;white-space:nowrap;writing-mode:horizontal-tb;word-break:normal;overflow-wrap:normal;vertical-align:middle}
+.th-scroll .data-table td[colspan]{white-space:normal}
+.th-date small{display:inline;margin-left:8px}
 @media (max-width:900px){.th-sum{grid-template-columns:repeat(2,minmax(0,1fr))}.th-tools{margin-left:0;width:100%}.th-search{flex:1}}
 </style>
 </head>
@@ -135,7 +142,7 @@
     } else {
       tb.innerHTML = list.slice(0, shown).map(e => `<tr>${dateCell(e.ts)}
         <td><span class="earn-src ${e.source}">${e.source}</span></td>
-        <td>${esc(e.asset)}${e.detail ? '<div style="color:var(--muted);font-size:.72rem">'+esc(e.detail)+'</div>' : ''}</td>
+        <td>${esc(e.asset)}${e.detail ? '<span style="color:var(--muted);font-size:.72rem;margin-left:8px">'+esc(e.detail)+'</span>' : ''}</td>
         <td class="side-${e.action.toLowerCase().replace(/\s+/g,'-')}">${esc(e.action)}</td>
         <td class="mono">${fmtPrice(e.price)}</td>
         <td class="mono">${esc(e.amountText)}</td>
