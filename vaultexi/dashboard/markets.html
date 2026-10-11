@@ -1211,7 +1211,7 @@ text-align:left;
   const getHoldings = () => { try { return JSON.parse(localStorage.getItem(LS_HOLD) || '{}'); } catch (e) { return {}; } };
   const setHoldings = h => localStorage.setItem(LS_HOLD, JSON.stringify(h));
   const getHistory = () => { try { return JSON.parse(localStorage.getItem(LS_HIST) || '[]'); } catch (e) { return []; } };
-  const setHistory = h => localStorage.setItem(LS_HIST, JSON.stringify(h.slice(0, 100)));
+  const setHistory = h => localStorage.setItem(LS_HIST, JSON.stringify(h.slice(0, 2000)));
 
   async function syncBalanceWithDeposits(uid) {
     if (window.VaultexDemo) return; // demo wallet (trading-wallet.js) is the balance source
